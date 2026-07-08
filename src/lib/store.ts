@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { compressImage } from "./compression";
 
-export type Format = "webp" | "jpeg";
+export type Format = "webp" | "jpeg" | "avif" | "png";
 
 export type ImageFile = {
   id: string;
@@ -35,6 +35,7 @@ type State = {
   removeFile: (id: string) => void;
   selectFile: (id: string) => void;
   setImageFormat: (id: string, format: Format) => void;
+  setImageQuality: (id: string, quality: number) => void;
   setImageMaxWidth: (id: string, maxWidth: number) => void;
   compressImageFile: (id: string) => Promise<void>;
   compressAll: () => Promise<void>;
@@ -133,6 +134,20 @@ export const useCompressor = create<State>((set, get) => ({
       return {
         files,
         defaultFormat: format,
+        selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
+      };
+    });
+    get().compressImageFile(id);
+  },
+
+  setImageQuality: (id: string, quality: number) => {
+    set((s) => {
+      const files = s.files.map((f) =>
+        f.id === id ? { ...f, quality } : f,
+      );
+      return {
+        files,
+        defaultQuality: quality,
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });

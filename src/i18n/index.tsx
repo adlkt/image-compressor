@@ -15,7 +15,9 @@ export type { Lang };
 const STORAGE_KEY = "image-compressor-lang";
 const DEFAULT_LANG: Lang = "zh";
 
-function detectLang(): Lang {
+function detectLang(serverLang?: Lang): Lang {
+  // Server-provided lang takes priority for initial render (SEO)
+  if (serverLang) return serverLang;
   if (typeof window === "undefined") return DEFAULT_LANG;
   const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
   if (stored && ["zh", "en", "ja"].includes(stored)) return stored;
@@ -33,16 +35,29 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
+export function I18nProvider({
+  children,
+  initialLang,
+}: {
+  children: ReactNode;
+  initialLang?: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(() => detectLang(initialLang));
 
   useEffect(() => {
-    setLangState(detectLang());
-  }, []);
+    // If server already set the right language, skip client re-detect
+    if (initialLang) return;
+    const detected = detectLang();
+    if (detected !== lang) {
+      setLangState(detected);
+      document.documentElement.lang = detected;
+    }
+  }, [initialLang, lang]);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     localStorage.setItem(STORAGE_KEY, l);
+    document.documentElement.lang = l;
   }, []);
 
   const value: I18nContextValue = {

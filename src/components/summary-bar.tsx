@@ -1,89 +1,107 @@
 "use client";
 
-import { Download, Package, Trash2 } from "lucide-react";
+import { Download, Loader2, Trash2 } from "lucide-react";
 import { useCompressor } from "@/lib/store";
 import { useI18n } from "@/i18n";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCallback } from "react";
 
 function formatSize(size: number) {
-  if (size < 1024) return `${size}B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)}KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)}MB`;
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function SummaryBar() {
   const { files } = useCompressor();
   const { t } = useI18n();
-
   if (files.length === 0) return null;
 
-  const totalOriginal = files.reduce((sum, f) => sum + f.file.size, 0);
-  const totalCompressed = files.reduce((sum, f) => sum + (f.compressedSize ?? f.file.size), 0);
-  const totalSaved = totalOriginal - totalCompressed;
-  const ratio = totalOriginal > 0 ? Math.round((totalSaved / totalOriginal) * 100) : 0;
-  const allDone = files.every((f) => f.compressedBlob !== null);
-  const compressing = files.some((f) => f.compressing);
+  const totalOriginal = files.reduce((sum, file) => sum + file.file.size, 0);
+  const totalCompressed = files.reduce(
+    (sum, file) => sum + (file.compressedSize ?? file.file.size),
+    0,
+  );
+  const ratio =
+    totalOriginal > 0
+      ? Math.round((1 - totalCompressed / totalOriginal) * 100)
+      : 0;
+  const allDone = files.every((file) => file.compressedBlob !== null);
+  const compressing = files.some((file) => file.compressing);
 
-  const downloadAll = useCallback(() => {
-    const doneFiles = files.filter((f) => f.compressedBlob !== null);
-    for (const f of doneFiles) {
-      const ext = f.format === "webp" ? ".webp" : ".jpg";
-      const baseName = f.file.name.replace(/\.[^.]+$/, "");
-      const url = URL.createObjectURL(f.compressedBlob!);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${baseName}${ext}`;
-      a.click();
-      URL.revokeObjectURL(url);
+  const downloadAll = () => {
+    for (const file of files.filter((item) => item.compressedBlob)) {
+      const extension = file.format === "jpeg" ? ".jpg" : `.${file.format}`;
+      const baseName = file.file.name.replace(/\.[^.]+$/, "");
+      const url = URL.createObjectURL(file.compressedBlob!);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${baseName}${extension}`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-  }, [files]);
+  };
 
-  const clearAll = useCallback(() => {
+  const clearAll = () => {
     const { removeFile } = useCompressor.getState();
-    [...files].forEach((f) => removeFile(f.id));
-  }, [files]);
+    [...files].forEach((file) => removeFile(file.id));
+  };
 
   return (
-    <Card>
-      <CardContent>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-6 flex-wrap">
-          <div>
-            <p className="text-[11px] text-muted-foreground">{t.summary.totalFiles}</p>
-            <p className="text-lg font-semibold tabular-nums">{files.length}</p>
-          </div>
-          <div>
-            <p className="text-[11px] text-muted-foreground">{t.summary.totalOriginal}</p>
-            <p className="text-lg font-semibold tabular-nums">{formatSize(totalOriginal)}</p>
-          </div>
-          <div>
-            <p className="text-[11px] text-muted-foreground">{t.summary.totalCompressed}</p>
-            <p className="text-lg font-semibold tabular-nums">{formatSize(totalCompressed)}</p>
-          </div>
-          {totalSaved > 0 && (
-            <div>
-              <p className="text-[11px] text-muted-foreground">{t.summary.totalSaved}</p>
-              <p className="text-lg font-semibold text-green-600 dark:text-green-400 tabular-nums">
-                {formatSize(totalSaved)} (-{ratio}%)
-              </p>
-            </div>
-          )}
+    <section
+      className="flex flex-col gap-5 rounded-2xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+      aria-label={t.summary.totalCompressed}
+    >
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:flex sm:gap-7">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            {t.summary.totalOriginal}
+          </p>
+          <p className="mt-1 font-mono text-base font-semibold">
+            {formatSize(totalOriginal)}
+          </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={clearAll}>
-            <Trash2 className="w-3.5 h-3.5" />
-            {t.controls.clearAll}
-          </Button>
-          <Button size="sm" onClick={downloadAll} disabled={!allDone || compressing}>
-            {files.length > 1 ? <Package className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
-            {files.length > 1 ? t.downloadAll : t.download}
-          </Button>
+        <span className="text-muted-foreground">→</span>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            {t.summary.totalCompressed}
+          </p>
+          <p className="mt-1 font-mono text-base font-semibold">
+            {formatSize(totalCompressed)}
+          </p>
         </div>
+        {allDone && (
+          <span
+            className={`hidden rounded-full px-2.5 py-1 font-mono text-xs font-semibold sm:inline ${ratio >= 0 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-400"}`}
+          >
+            {ratio >= 0 ? `-${ratio}%` : `+${Math.abs(ratio)}%`}
+          </span>
+        )}
       </div>
-      </CardContent>
-    </Card>
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={clearAll}
+          className="min-h-11 flex-1 sm:flex-none"
+        >
+          <Trash2 className="size-4" />
+          {t.controls.clearAll}
+        </Button>
+        <Button
+          type="button"
+          onClick={downloadAll}
+          disabled={!allDone || compressing}
+          className="min-h-11 flex-[1.4] bg-emerald-600 text-white hover:bg-emerald-700 sm:flex-none dark:bg-emerald-500 dark:text-neutral-950 dark:hover:bg-emerald-400"
+        >
+          {compressing ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Download className="size-4" />
+          )}
+          {files.length > 1 ? t.downloadAll : t.download}
+        </Button>
+      </div>
+    </section>
   );
 }

@@ -1,103 +1,126 @@
 "use client";
 
-import { X, Loader2, Plus } from "lucide-react";
+import { Check, Loader2, Plus, X } from "lucide-react";
 import { useCompressor } from "@/lib/store";
 import { useI18n } from "@/i18n";
-import { Card, CardContent } from "@/components/ui/card";
 
 function formatSize(size: number) {
-  if (size < 1024) return `${size}B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)}KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)}MB`;
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function FileQueue() {
-  const { files, selectedId, selectFile, removeFile } = useCompressor();
+  const { files, selectedId, selectFile, removeFile, addFiles } =
+    useCompressor();
   const { t } = useI18n();
 
-  if (files.length === 0) return null;
-
   return (
-    <Card className="!overflow-visible">
-      <CardContent>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground">
+    <section
+      className="rounded-2xl border bg-card p-3 shadow-sm"
+      aria-label={t.controls.files}
+    >
+      <div className="mb-2 flex items-center justify-between px-1">
+        <p className="text-xs font-medium text-muted-foreground">
           {files.length} {t.controls.files}
-        </span>
-      </div>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {files.map((f) => {
-          const ratio = f.compressedSize
-            ? Math.round((1 - f.compressedSize / f.file.size) * 100)
-            : null;
-          const isSelected = f.id === selectedId;
-
-          return (
-            <button
-              key={f.id}
-              onClick={() => selectFile(f.id)}
-              className={`relative flex-shrink-0 w-28 rounded-xl border overflow-hidden transition-all group ${
-                isSelected
-                  ? "border-foreground ring-1 ring-foreground/20"
-                  : "border-transparent hover:border-border"
-              }`}
-            >
-              <div className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden">
-                <img
-                  src={f.originalUrl}
-                  alt={f.file.name}
-                  className="w-full h-full object-cover"
-                />
-                {f.compressing && (
-                  <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin text-foreground" />
-                  </div>
-                )}
-              </div>
-              <div className="p-1.5 text-left">
-                <p className="text-[11px] text-foreground truncate leading-tight">{f.file.name}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {formatSize(f.file.size)}
-                  {ratio !== null && (
-                    <span className="text-green-600 dark:text-green-400 ml-1">-{ratio}%</span>
-                  )}
-                </p>
-              </div>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeFile(f.id);
-                }}
-                role="button"
-                tabIndex={0}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-background/90 ring-1 ring-foreground/10
-                  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-destructive/10 cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </span>
-            </button>
-          );
-        })}
-        {/* Add more button */}
-        <button
-          onClick={() => document.getElementById("file-input-queue")?.click()}
-          className="flex-shrink-0 w-28 aspect-square rounded-xl border border-border hover:border-foreground/30
-            flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+        </p>
+        <label
+          htmlFor="file-input-queue"
+          className="flex min-h-10 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <Plus className="w-5 h-5" />
-          <span className="text-[10px]">{t.controls.add}</span>
-        </button>
-        <input id="file-input-queue" type="file" accept="image/*" multiple
-          onChange={(e) => {
-            const selected = Array.from(e.target.files ?? []);
-            const images = selected.filter((f) => f.type.startsWith("image/"));
-            if (images.length > 0) useCompressor.getState().addFiles(images);
-            e.target.value = "";
+          <Plus className="size-4" />
+          {t.controls.add}
+        </label>
+        <input
+          id="file-input-queue"
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          onChange={(event) => {
+            addFiles(
+              Array.from(event.target.files ?? []).filter((file) =>
+                file.type.startsWith("image/"),
+              ),
+            );
+            event.target.value = "";
           }}
-          className="hidden"
         />
       </div>
-      </CardContent>
-    </Card>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {files.map((file) => {
+          const isSelected = file.id === selectedId;
+          const ratio = file.compressedSize
+            ? Math.round((1 - file.compressedSize / file.file.size) * 100)
+            : null;
+
+          return (
+            <div
+              key={file.id}
+              className={`group relative w-36 shrink-0 overflow-hidden rounded-xl border transition-colors ${
+                isSelected
+                  ? "border-foreground bg-accent/70"
+                  : "border-border hover:bg-accent/40"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => selectFile(file.id)}
+                className="block w-full p-2 text-left"
+                aria-pressed={isSelected}
+              >
+                <span className="relative block aspect-[4/3] overflow-hidden rounded-lg bg-muted">
+                  <img
+                    src={file.originalUrl}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                  {file.compressing && (
+                    <span
+                      className="absolute inset-0 flex items-center justify-center bg-background/70"
+                      aria-live="polite"
+                    >
+                      <Loader2 className="size-4 animate-spin" />
+                      <span className="sr-only">{t.controls.compressing}</span>
+                    </span>
+                  )}
+                  {file.compressedBlob && !file.compressing && (
+                    <span className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-emerald-600 text-white">
+                      <Check className="size-3" />
+                    </span>
+                  )}
+                </span>
+                <span className="mt-2 block truncate text-xs font-medium">
+                  {file.file.name}
+                </span>
+                <span className="mt-1 flex gap-1.5 font-mono text-[10px] text-muted-foreground">
+                  {formatSize(file.file.size)}
+                  {ratio !== null && (
+                    <span
+                      className={
+                        ratio >= 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      }
+                    >
+                      {ratio >= 0 ? `-${ratio}%` : `+${Math.abs(ratio)}%`}
+                    </span>
+                  )}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => removeFile(file.id)}
+                className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-100 shadow-sm transition hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label={`${t.controls.remove} ${file.file.name}`}
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

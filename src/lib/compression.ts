@@ -22,16 +22,19 @@ export async function compressImage(
   const ctx = canvas.getContext("2d")!;
   ctx.drawImage(img, 0, 0, w, h);
 
-  const mimeType = format === "webp" ? "image/webp" : "image/jpeg";
+  const mimeType =
+    format === "webp" ? "image/webp" : format === "avif" ? "image/avif" : format === "jpeg" ? "image/jpeg" : "image/png";
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (b) => {
         if (b) resolve(b);
+        else if (format === "avif") reject(new Error("AVIF encoding not supported in this browser"));
         else reject(new Error("Compression failed"));
       },
       mimeType,
-      quality / 100,
+      // PNG is lossless, quality param has no effect — omit for clarity
+      format === "png" ? undefined : quality / 100,
     );
   });
 }

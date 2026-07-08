@@ -1,0 +1,3 @@
+$ next build
+sh: next: command not found
+[ELIFECYCLE] Command failed.

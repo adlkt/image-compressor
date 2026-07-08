@@ -1,11 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, type DragEvent, type ChangeEvent } from "react";
-import { Shield, Zap, FileImage, Download } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+} from "react";
+import { ArrowDown, Check, ImagePlus, LockKeyhole } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useCompressor } from "@/lib/store";
-import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import { FileQueue } from "@/components/file-queue";
 import { SettingsBar } from "@/components/settings-bar";
 import { PreviewPanel } from "@/components/preview-panel";
@@ -14,44 +20,50 @@ import { SummaryBar } from "@/components/summary-bar";
 export default function Home() {
   const { t } = useI18n();
   const { files, addFiles } = useCompressor();
+  const [dragOver, setDragOver] = useState(false);
 
   const handleFiles = useCallback(
     (newFiles: File[]) => {
-      const images = newFiles.filter((f) => f.type.startsWith("image/"));
+      const images = newFiles.filter((file) => file.type.startsWith("image/"));
       if (images.length > 0) addFiles(images);
     },
     [addFiles],
   );
 
+  const onDragOver = useCallback((event: DragEvent) => {
+    event.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const onDragLeave = useCallback((event: DragEvent) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setDragOver(false);
+    }
+  }, []);
+
   const onDrop = useCallback(
-    (e: DragEvent) => {
-      e.preventDefault();
-      const dropped = Array.from(e.dataTransfer.files);
-      handleFiles(dropped);
-    },
-    [handleFiles],
-  );
-  const onFileChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const selected = Array.from(e.target.files ?? []);
-      handleFiles(selected);
-      e.target.value = "";
+    (event: DragEvent) => {
+      event.preventDefault();
+      setDragOver(false);
+      handleFiles(Array.from(event.dataTransfer.files));
     },
     [handleFiles],
   );
 
-  // Paste
+  const onFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      handleFiles(Array.from(event.target.files ?? []));
+      event.target.value = "";
+    },
+    [handleFiles],
+  );
+
   useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      const imageFiles: File[] = [];
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith("image/")) {
-          const file = items[i].getAsFile();
-          if (file) imageFiles.push(file);
-        }
-      }
+    const onPaste = (event: ClipboardEvent) => {
+      const imageFiles = Array.from(event.clipboardData?.items ?? [])
+        .filter((item) => item.type.startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter((file): file is File => file !== null);
       if (imageFiles.length > 0) handleFiles(imageFiles);
     };
     window.addEventListener("paste", onPaste);
@@ -61,78 +73,139 @@ export default function Home() {
   const hasFiles = files.length > 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <main className="flex-1">
-        {!hasFiles ? (
-          /* Landing */
-          <>
-            <section className="max-w-3xl mx-auto px-6 pt-24 pb-16 text-center">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">{t.hero}</h1>
-            </section>
+      {!hasFiles ? (
+        <main>
+          <section className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-5xl flex-col items-center px-5 pb-16 pt-14 sm:px-8 sm:pt-20">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/80 bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
+              <LockKeyhole className="size-3.5" />
+              {t.features.privacy.desc}
+            </div>
 
-            <section className="max-w-2xl mx-auto px-6 mb-20">
-              <Card
-                className="p-16 text-center cursor-pointer transition-all duration-200 hover:bg-accent/50 bg-card/50"
-                onClick={() => document.getElementById("file-input")?.click()}
-              >
-                <input id="file-input" type="file" accept="image/*" multiple onChange={onFileChange} className="hidden" />
-                <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-5">
-                  <Download className="w-6 h-6 text-muted-foreground rotate-180" />
-                </div>
-                <p className="font-medium text-lg mb-1.5">{t.dropzone.title}</p>
-                <p className="text-sm text-muted-foreground">{t.dropzone.subtitle}</p>
-              </Card>
-            </section>
+            <div className="max-w-3xl text-center">
+              <h1 className="text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">
+                {t.hero}
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
+                {t.heroSub}
+              </p>
+            </div>
 
-            <section className="max-w-4xl mx-auto px-6 pb-24">
-              <div className="grid sm:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent>
-                    <Shield className="w-8 h-8 text-blue-500 mb-4" />
-                    <h3 className="font-semibold mb-2">{t.features.privacy.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{t.features.privacy.desc}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent>
-                    <FileImage className="w-8 h-8 text-green-500 mb-4" />
-                    <h3 className="font-semibold mb-2">{t.features.format.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{t.features.format.desc}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent>
-                    <Zap className="w-8 h-8 text-amber-500 mb-4" />
-                    <h3 className="font-semibold mb-2">{t.features.realtime.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{t.features.realtime.desc}</p>
-                  </CardContent>
-                </Card>
+            <label
+              htmlFor="file-input"
+              className={`group relative mt-10 flex w-full max-w-3xl cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border bg-card px-6 py-16 text-center shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)] transition-all sm:py-20 ${
+                dragOver
+                  ? "border-foreground bg-accent/70 ring-4 ring-foreground/5"
+                  : "border-border/90 hover:border-foreground/30 hover:bg-accent/30"
+              }`}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+            >
+              <div className="pointer-events-none absolute inset-0 workspace-grid opacity-40" />
+              <div className="relative flex size-14 items-center justify-center rounded-2xl bg-foreground text-background shadow-lg transition-transform group-hover:-translate-y-1">
+                <ImagePlus className="size-6" />
               </div>
-            </section>
-          </>
-        ) : (
-          /* Editor */
-          <section
-            className="max-w-6xl mx-auto px-6 py-10 space-y-6"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={onDrop}
-          >
-            {/* Thumbnail queue */}
-            <FileQueue />
+              <p className="relative mt-5 text-lg font-semibold">
+                {t.dropzone.title}
+              </p>
+              <p className="relative mt-2 text-sm text-muted-foreground">
+                {t.dropzone.subtitle}
+              </p>
+              <div className="relative mt-7 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+                <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
+                  WebP
+                </span>
+                <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
+                  80%
+                </span>
+                <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
+                  1920 px
+                </span>
+              </div>
+              <input
+                id="file-input"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={onFileChange}
+                className="sr-only"
+              />
+            </label>
 
-            {/* Settings */}
-            <SettingsBar />
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              {[
+                t.features.privacy.title,
+                t.features.format.title,
+                t.features.realtime.title,
+              ].map((item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  {item}
+                </span>
+              ))}
+            </div>
 
-            {/* Preview */}
-            <PreviewPanel />
-
-            {/* Summary + Actions */}
-            <SummaryBar />
+            <div className="mt-16 grid w-full max-w-3xl gap-4 border-t pt-8 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  {t.summary.totalOriginal}
+                </p>
+                <p className="mt-1 font-mono text-2xl font-semibold">4.8 MB</p>
+              </div>
+              <ArrowDown className="size-5 rotate-0 text-muted-foreground sm:-rotate-90" />
+              <div className="sm:text-right">
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  {t.summary.totalCompressed}
+                </p>
+                <p className="mt-1 font-mono text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                  620 KB <span className="text-sm">-87%</span>
+                </p>
+              </div>
+            </div>
           </section>
-        )}
-      </main>
+
+          <section className="border-t bg-muted/20 px-5 py-16 sm:px-8">
+            <div className="mx-auto max-w-3xl">
+              <p className="mb-8 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                {t.faq.title}
+              </p>
+              <div className="divide-y border-y">
+                {t.faq.items.slice(0, 3).map((item) => (
+                  <details key={item.q} className="group py-5">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
+                      {item.q}
+                      <span className="text-lg font-light text-muted-foreground transition-transform group-open:rotate-45">
+                        +
+                      </span>
+                    </summary>
+                    <p className="max-w-2xl pt-3 text-sm leading-6 text-muted-foreground">
+                      {item.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
+      ) : (
+        <main
+          className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-7"
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={onDrop}
+        >
+          <div className="space-y-4">
+            <FileQueue />
+            <SettingsBar />
+            <PreviewPanel />
+            <SummaryBar />
+          </div>
+        </main>
+      )}
+
+      {!hasFiles && <Footer />}
     </div>
   );
 }
