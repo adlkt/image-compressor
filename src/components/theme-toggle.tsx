@@ -11,6 +11,8 @@ export function ThemeToggle() {
   const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
 
+  // next-themes needs a client-only render pass to avoid hydration mismatches.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {

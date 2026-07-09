@@ -1,76 +1,39 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
-import { translations, type Lang, type Translations } from "./translations";
+import { useCallback, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale, useMessages } from "next-intl";
+import { LOCALE_COOKIE, isLang, type Lang } from "./locales";
+import type { Translations } from "./translations";
 
 export type { Lang };
 
-const STORAGE_KEY = "image-compressor-lang";
-const DEFAULT_LANG: Lang = "zh";
-
-function detectLang(serverLang?: Lang): Lang {
-  // Server-provided lang takes priority for initial render (SEO)
-  if (serverLang) return serverLang;
-  if (typeof window === "undefined") return DEFAULT_LANG;
-  const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
-  if (stored && ["zh", "en", "ja"].includes(stored)) return stored;
-  const nav = navigator.language.toLowerCase();
-  if (nav.startsWith("zh")) return "zh";
-  if (nav.startsWith("ja")) return "ja";
-  return "en";
-}
-
-type I18nContextValue = {
+type I18nValue = {
   lang: Lang;
   setLang: (lang: Lang) => void;
+  isPending: boolean;
   t: Translations;
 };
 
-const I18nContext = createContext<I18nContextValue | null>(null);
-
-export function I18nProvider({
-  children,
-  initialLang,
-}: {
-  children: ReactNode;
-  initialLang?: Lang;
-}) {
-  const [lang, setLangState] = useState<Lang>(() => detectLang(initialLang));
-
-  useEffect(() => {
-    // If server already set the right language, skip client re-detect
-    if (initialLang) return;
-    const detected = detectLang();
-    if (detected !== lang) {
-      setLangState(detected);
-      document.documentElement.lang = detected;
-    }
-  }, [initialLang, lang]);
-
-  const setLang = useCallback((l: Lang) => {
-    setLangState(l);
-    localStorage.setItem(STORAGE_KEY, l);
-    document.documentElement.lang = l;
-  }, []);
-
-  const value: I18nContextValue = {
-    lang,
-    setLang,
-    t: translations[lang],
-  };
-
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+function persistLang(lang: Lang) {
+  document.cookie = `${LOCALE_COOKIE}=${lang}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  document.documentElement.lang = lang;
 }
 
-export function useI18n() {
-  const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
-  return ctx;
+export function useI18n(): I18nValue {
+  const router = useRouter();
+  const locale = useLocale();
+  const messages = useMessages();
+  const [isPending, startTransition] = useTransition();
+  const lang = isLang(locale) ? locale : "zh";
+
+  const setLang = useCallback(
+    (nextLang: Lang) => {
+      persistLang(nextLang);
+      startTransition(() => router.refresh());
+    },
+    [router],
+  );
+
+  return { lang, setLang, isPending, t: messages as Translations };
 }

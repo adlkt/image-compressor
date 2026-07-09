@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { I18nProvider, type Lang } from "@/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://image-compressor.314925.xyz"),
@@ -75,28 +75,15 @@ export const metadata: Metadata = {
   },
 };
 
-async function detectServerLang(): Promise<Lang> {
-  try {
-    const h = await headers();
-    const acceptLanguage = h.get("accept-language") ?? "";
-    const first = acceptLanguage.split(",")[0]?.trim().toLowerCase() ?? "";
-    if (first.startsWith("zh")) return "zh";
-    if (first.startsWith("ja")) return "ja";
-  } catch {
-    // headers() not available (e.g. static export), fall through
-  }
-  return "zh";
-}
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const lang = await detectServerLang();
+  const locale = await getLocale();
 
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -173,9 +160,9 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          <I18nProvider initialLang={lang}>{children}</I18nProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
