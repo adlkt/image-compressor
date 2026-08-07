@@ -37,6 +37,10 @@ export type Translations = {
     compressing: string;
     files: string;
     add: string;
+    processing: string;
+    allDone: string;
+    failedItems: string;
+    retry: string;
   };
   presets: {
     presetWeb: string;
@@ -124,6 +128,10 @@ export const translations: Record<Lang, Translations> = {
       compressing: "压缩中",
       files: "个文件",
       add: "添加",
+      processing: "压缩中",
+      allDone: "已完成",
+      failedItems: "失败 {count} 项",
+      retry: "点击重试",
     },
     presets: {
       presetWeb: "Web 优化",
@@ -261,6 +269,10 @@ export const translations: Record<Lang, Translations> = {
       compressing: "Compressing",
       files: "files",
       add: "Add",
+      processing: "Processing",
+      allDone: "All done",
+      failedItems: "{count} failed",
+      retry: "Click to retry",
     },
     presets: {
       presetWeb: "Web optimized",
@@ -404,6 +416,10 @@ export const translations: Record<Lang, Translations> = {
       compressing: "圧縮中",
       files: "ファイル",
       add: "追加",
+      processing: "処理中",
+      allDone: "完了",
+      failedItems: "{count} 件失敗",
+      retry: "クリックで再試行",
     },
     presets: {
       presetWeb: "ウェブ最適化",

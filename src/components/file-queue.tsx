@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2, Plus, X } from "lucide-react";
+import { AlertTriangle, Check, Loader2, Plus, X } from "lucide-react";
 import { useCompressor } from "@/lib/store";
 import { useI18n } from "@/i18n";
 
@@ -11,9 +11,17 @@ function formatSize(size: number) {
 }
 
 export function FileQueue() {
-  const { files, selectedId, selectFile, removeFile, addFiles } =
+  const { files, selectedId, selectFile, removeFile, addFiles, compressImageFile } =
     useCompressor();
   const { t } = useI18n();
+
+  const handleThumbClick = (id: string, hasError: boolean) => {
+    if (hasError) {
+      compressImageFile(id);
+    } else {
+      selectFile(id);
+    }
+  };
 
   return (
     <section
@@ -51,6 +59,7 @@ export function FileQueue() {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {files.map((file) => {
           const isSelected = file.id === selectedId;
+          const hasError = !!file.error;
           const ratio = file.compressedSize
             ? Math.round((1 - file.compressedSize / file.file.size) * 100)
             : null;
@@ -61,14 +70,19 @@ export function FileQueue() {
               className={`group relative w-36 shrink-0 overflow-hidden rounded-xl border transition-colors ${
                 isSelected
                   ? "border-foreground bg-accent/70"
-                  : "border-border hover:bg-accent/40"
+                  : hasError
+                    ? "border-red-500/50 hover:bg-accent/40"
+                    : "border-border hover:bg-accent/40"
               }`}
             >
               <button
                 type="button"
-                onClick={() => selectFile(file.id)}
+                onClick={() => handleThumbClick(file.id, hasError)}
                 className="block w-full p-2 text-left"
                 aria-pressed={isSelected}
+                aria-label={
+                  hasError ? `${t.controls.retry} ${file.file.name}` : file.file.name
+                }
               >
                 <span className="relative block aspect-[4/3] overflow-hidden rounded-lg bg-muted">
                   <img
@@ -85,18 +99,28 @@ export function FileQueue() {
                       <span className="sr-only">{t.controls.compressing}</span>
                     </span>
                   )}
-                  {file.compressedBlob && !file.compressing && (
+                  {hasError && (
+                    <span className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-red-600 text-white">
+                      <AlertTriangle className="size-3" />
+                    </span>
+                  )}
+                  {file.compressedBlob && !file.compressing && !hasError && (
                     <span className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-emerald-600 text-white">
                       <Check className="size-3" />
                     </span>
                   )}
                 </span>
+                {hasError && (
+                  <span className="mt-2 block line-clamp-2 text-[10px] leading-tight text-red-600 dark:text-red-400">
+                    {file.error}
+                  </span>
+                )}
                 <span className="mt-2 block truncate text-xs font-medium">
                   {file.file.name}
                 </span>
                 <span className="mt-1 flex gap-1.5 font-mono text-[10px] text-muted-foreground">
                   {formatSize(file.file.size)}
-                  {ratio !== null && (
+                  {ratio !== null && !hasError && (
                     <span
                       className={
                         ratio >= 0
@@ -105,6 +129,11 @@ export function FileQueue() {
                       }
                     >
                       {ratio >= 0 ? `-${ratio}%` : `+${Math.abs(ratio)}%`}
+                    </span>
+                  )}
+                  {hasError && (
+                    <span className="text-red-600 dark:text-red-400">
+                      {t.controls.retry}
                     </span>
                   )}
                 </span>

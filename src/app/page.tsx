@@ -7,7 +7,7 @@ import {
   type ChangeEvent,
   type DragEvent,
 } from "react";
-import { ArrowDown, Check, ImagePlus, LockKeyhole } from "lucide-react";
+import { Check, ImagePlus, LockKeyhole } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useCompressor } from "@/lib/store";
 import { Navbar } from "@/components/navbar";
@@ -146,24 +146,6 @@ export default function Home() {
                   {item}
                 </span>
               ))}
-            </div>
-
-            <div className="mt-16 grid w-full max-w-3xl gap-4 border-t pt-8 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  {t.summary.totalOriginal}
-                </p>
-                <p className="mt-1 font-mono text-2xl font-semibold">4.8 MB</p>
-              </div>
-              <ArrowDown className="size-5 rotate-0 text-muted-foreground sm:-rotate-90" />
-              <div className="sm:text-right">
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  {t.summary.totalCompressed}
-                </p>
-                <p className="mt-1 font-mono text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
-                  620 KB <span className="text-sm">-87%</span>
-                </p>
-              </div>
             </div>
           </section>
 
