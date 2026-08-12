@@ -42,6 +42,33 @@ type State = {
   compressAll: () => void;
 };
 
+const DEFAULTS_KEY = "image-compressor:defaults";
+
+type StoredDefaults = Partial<
+  Pick<State, "defaultFormat" | "defaultQuality" | "defaultMaxWidth">
+>;
+
+function loadDefaults(): StoredDefaults {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(DEFAULTS_KEY);
+    return raw ? (JSON.parse(raw) as StoredDefaults) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDefaults(values: StoredDefaults) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DEFAULTS_KEY, JSON.stringify(values));
+  } catch {
+    // ignore quota / private-mode errors
+  }
+}
+
+const storedDefaults = loadDefaults();
+
 let worker: Worker | null = null;
 
 function getWorker(
@@ -95,9 +122,9 @@ function getWorker(
 export const useCompressor = create<State>((set, get) => ({
   files: [],
   selectedId: null,
-  defaultFormat: "webp",
-  defaultQuality: 80,
-  defaultMaxWidth: 1920,
+  defaultFormat: storedDefaults.defaultFormat ?? "jpeg",
+  defaultQuality: storedDefaults.defaultQuality ?? 80,
+  defaultMaxWidth: storedDefaults.defaultMaxWidth ?? 1920,
   selectedFile: null,
 
   addFiles: (newFiles: File[]) => {
@@ -187,6 +214,8 @@ export const useCompressor = create<State>((set, get) => ({
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
+    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
     get().compressImageFile(id);
   },
 
@@ -201,6 +230,8 @@ export const useCompressor = create<State>((set, get) => ({
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
+    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
     get().compressImageFile(id);
   },
 
@@ -215,6 +246,8 @@ export const useCompressor = create<State>((set, get) => ({
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
+    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
     get().compressImageFile(id);
   },
 
