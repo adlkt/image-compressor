@@ -205,9 +205,7 @@ export const useCompressor = create<State>((set, get) => ({
 
   setImageFormat: (id: string, format: Format) => {
     set((s) => {
-      const files = s.files.map((f) =>
-        f.id === id ? { ...f, format } : f,
-      );
+      const files = s.files.map((f) => ({ ...f, format }));
       return {
         files,
         defaultFormat: format,
@@ -216,7 +214,8 @@ export const useCompressor = create<State>((set, get) => ({
     });
     const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
     saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
-    get().compressImageFile(id);
+    // 格式是全局固定项：所有文件统一按新格式重新压缩
+    get().files.forEach((f) => get().compressImageFile(f.id));
   },
 
   setImageQuality: (id: string, quality: number) => {

@@ -19,7 +19,8 @@ import { SummaryBar } from "@/components/summary-bar";
 
 export default function Home() {
   const { t } = useI18n();
-  const { files, addFiles } = useCompressor();
+  const { files, addFiles, defaultFormat, defaultQuality, defaultMaxWidth } =
+    useCompressor();
   const [dragOver, setDragOver] = useState(false);
 
   const handleFiles = useCallback(
@@ -116,13 +117,17 @@ export default function Home() {
               </p>
               <div className="relative mt-7 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
                 <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
-                  WebP
+                  {defaultFormat.toUpperCase()}
                 </span>
                 <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
-                  80%
+                  {defaultFormat === "png"
+                    ? "—"
+                    : `${defaultQuality}%`}
                 </span>
                 <span className="rounded-md border bg-background/80 px-2.5 py-1.5">
-                  1920 px
+                  {defaultMaxWidth === 0
+                    ? t.controls.noLimit
+                    : `${defaultMaxWidth} px`}
                 </span>
               </div>
               <input
