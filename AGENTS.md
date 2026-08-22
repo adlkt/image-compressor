@@ -13,7 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 样式 Tailwind v4（CSS-first，`globals.css` 里 `@import "tailwindcss"` + `@theme`），无 `tailwind.config.js`。
 - 状态：`zustand`（`src/lib/store.ts`）。主题：`next-themes` + `src/components/theme-provider.tsx`。
 - 图标：`lucide-react`。
-- 多语言：`next-intl` + `src/i18n`（`request.ts` / `locales.ts` / `translations.ts`），语言切换器 `src/components/language-switcher.tsx`。
+- 多语言：客户端 `I18nProvider` + `src/i18n`（`locales.ts` / `translations.ts`），语言切换器 `src/components/language-switcher.tsx`。
 
 ## 目录
 - `src/app`：`layout.tsx` / `page.tsx` / `globals.css` / `privacy/page.tsx`（隐私页）。
@@ -22,7 +22,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `src/i18n`：国际化。
 
 ## 约定
-- 压缩核心在 `src/lib/compression.ts`，新增压缩算法/格式走这里，不要在组件里内联。
+- 压缩核心在 `src/lib/compress-worker.ts`，新增压缩算法/格式走这里，不要在组件里内联。
 - 新增 UI 原子组件用 `shadcn add`，保持 `src/components/ui` 单一来源。
 - 跑 `pnpm --filter image-compressor dev` 默认端口 3456（`NODE_OPTIONS='--no-deprecation'`）。
 - 根仓库 `AGENTS.md` 的 monorepo / submodule / 提交约定同样适用（本 app 是 git submodule）。
+
+## 提交规范
+- Commit message 在 Conventional Commits 规范前增加日期时间，格式为：`YYYY 年 M 月 D 日 HH:mm <type>[(scope)]：<描述>`。
+- `<type>` 按改动语义选择，不限制为固定集合；可使用 `feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`build`、`ci`、`chore`、`revert`、`add` 等。
+- `(scope)` 可选；使用中文全角冒号 `：`，例如：`2026 年 8 月 22 日 13:33 perf：首页加载优化`。
