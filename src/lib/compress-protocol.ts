@@ -3,6 +3,7 @@ import type { Format } from "./store";
 export type CompressRequest = {
   type: "compress";
   id: string;
+  requestId: number;
   file: File;
   format: Format;
   quality: number;
@@ -10,5 +11,5 @@ export type CompressRequest = {
 };
 
 export type CompressResponse =
-  | { type: "done"; id: string; blob: Blob }
-  | { type: "error"; id: string; reason: string };
+  | { type: "done"; id: string; requestId: number; blob: Blob }
+  | { type: "error"; id: string; requestId: number; reason: string };

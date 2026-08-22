@@ -70,6 +70,15 @@ function saveDefaults(values: StoredDefaults) {
 const storedDefaults = loadDefaults();
 
 let worker: Worker | null = null;
+let requestCounter = 0;
+const latestRequests = new Map<string, number>();
+const qualityTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function clearQualityTimer(id: string) {
+  const timer = qualityTimers.get(id);
+  if (timer) clearTimeout(timer);
+  qualityTimers.delete(id);
+}
 
 function getWorker(
   set: (partial: Partial<State> | ((state: State) => Partial<State>)) => void,
@@ -79,7 +88,10 @@ function getWorker(
   worker = new Worker(new URL("./compress-worker.ts", import.meta.url));
 
   worker.onmessage = (event: MessageEvent<CompressResponse>) => {
-    const { id } = event.data;
+    const { id, requestId } = event.data;
+
+    if (latestRequests.get(id) !== requestId) return;
+    latestRequests.delete(id);
 
     set((s) => {
       const files = s.files.map((f) => {
@@ -183,6 +195,8 @@ export const useCompressor = create<State>((set, get) => ({
   },
 
   removeFile: (id: string) => {
+    clearQualityTimer(id);
+    latestRequests.delete(id);
     set((s) => {
       const file = s.files.find((f) => f.id === id);
       if (file) {
@@ -204,6 +218,7 @@ export const useCompressor = create<State>((set, get) => ({
   },
 
   setImageFormat: (id: string, format: Format) => {
+    get().files.forEach((file) => clearQualityTimer(file.id));
     set((s) => {
       const files = s.files.map((f) => ({ ...f, format }));
       return {
@@ -231,10 +246,18 @@ export const useCompressor = create<State>((set, get) => ({
     });
     const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
     saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
-    get().compressImageFile(id);
+    clearQualityTimer(id);
+    qualityTimers.set(
+      id,
+      setTimeout(() => {
+        qualityTimers.delete(id);
+        get().compressImageFile(id);
+      }, 180),
+    );
   },
 
   setImageMaxWidth: (id: string, maxWidth: number) => {
+    clearQualityTimer(id);
     set((s) => {
       const files = s.files.map((f) =>
         f.id === id ? { ...f, maxWidth } : f,
@@ -251,8 +274,12 @@ export const useCompressor = create<State>((set, get) => ({
   },
 
   compressImageFile: (id: string) => {
+    clearQualityTimer(id);
     const file = get().files.find((f) => f.id === id);
     if (!file) return;
+
+    const requestId = ++requestCounter;
+    latestRequests.set(id, requestId);
 
     set((s) => ({
       files: s.files.map((f) =>
@@ -264,6 +291,7 @@ export const useCompressor = create<State>((set, get) => ({
     w.postMessage({
       type: "compress",
       id,
+      requestId,
       file: file.file,
       format: file.format,
       quality: file.quality,

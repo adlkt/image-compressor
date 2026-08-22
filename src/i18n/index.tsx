@@ -1,10 +1,22 @@
 "use client";
 
-import { useCallback, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useLocale, useMessages } from "next-intl";
-import { LOCALE_COOKIE, isLang, type Lang } from "./locales";
-import type { Translations } from "./translations";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useSyncExternalStore,
+  useTransition,
+  type ReactNode,
+} from "react";
+import {
+  DEFAULT_LANG,
+  LOCALE_COOKIE,
+  isLang,
+  normalizeLang,
+  type Lang,
+} from "./locales";
+import { translations, type Translations } from "./translations";
 
 export type { Lang };
 
@@ -20,20 +32,70 @@ function persistLang(lang: Lang) {
   document.documentElement.lang = lang;
 }
 
-export function useI18n(): I18nValue {
-  const router = useRouter();
-  const locale = useLocale();
-  const messages = useMessages();
+function detectBrowserLang(): Lang {
+  const cookieLang = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${LOCALE_COOKIE}=`))
+    ?.split("=")[1];
+  if (isLang(cookieLang)) return cookieLang;
+
+  return normalizeLang(navigator.language) ?? DEFAULT_LANG;
+}
+
+const I18nContext = createContext<I18nValue | null>(null);
+const langListeners = new Set<() => void>();
+let browserLang: Lang | null = null;
+
+function subscribeToLang(listener: () => void) {
+  langListeners.add(listener);
+  return () => {
+    langListeners.delete(listener);
+  };
+}
+
+function getBrowserLang(): Lang {
+  browserLang ??= detectBrowserLang();
+  return browserLang;
+}
+
+function getServerLang(): Lang {
+  return DEFAULT_LANG;
+}
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const lang = useSyncExternalStore(
+    subscribeToLang,
+    getBrowserLang,
+    getServerLang,
+  );
   const [isPending, startTransition] = useTransition();
-  const lang = isLang(locale) ? locale : "zh";
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = useCallback(
     (nextLang: Lang) => {
       persistLang(nextLang);
-      startTransition(() => router.refresh());
+      startTransition(() => {
+        browserLang = nextLang;
+        langListeners.forEach((listener) => listener());
+      });
     },
-    [router],
+    [],
   );
 
-  return { lang, setLang, isPending, t: messages as Translations };
+  return (
+    <I18nContext.Provider
+      value={{ lang, setLang, isPending, t: translations[lang] }}
+    >
+      {children}
+    </I18nContext.Provider>
+  );
+}
+
+export function useI18n(): I18nValue {
+  const context = useContext(I18nContext);
+  if (!context) throw new Error("useI18n must be used within I18nProvider");
+  return context;
 }

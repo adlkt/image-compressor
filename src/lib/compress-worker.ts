@@ -47,15 +47,43 @@ declare const self: {
   onmessage: ((event: MessageEvent) => void) | null;
 };
 
-self.onmessage = async (event: MessageEvent<CompressRequest>) => {
-  const { id, file, format, quality, maxWidth } = event.data;
-  try {
-    const blob = await compress(file, format, quality, maxWidth);
-    const response: CompressResponse = { type: "done", id, blob };
-    self.postMessage(response);
-  } catch (err) {
-    const reason = err instanceof Error ? err.message : "Compression failed";
-    const response: CompressResponse = { type: "error", id, reason };
-    self.postMessage(response);
+const pending = new Map<string, CompressRequest>();
+let processing = false;
+
+async function processQueue() {
+  if (processing) return;
+  processing = true;
+
+  while (pending.size > 0) {
+    const next = pending.entries().next().value as
+      | [string, CompressRequest]
+      | undefined;
+    if (!next) break;
+
+    const [id, request] = next;
+    pending.delete(id);
+    const { requestId, file, format, quality, maxWidth } = request;
+
+    try {
+      const blob = await compress(file, format, quality, maxWidth);
+      const response: CompressResponse = { type: "done", id, requestId, blob };
+      self.postMessage(response);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "Compression failed";
+      const response: CompressResponse = {
+        type: "error",
+        id,
+        requestId,
+        reason,
+      };
+      self.postMessage(response);
+    }
   }
+
+  processing = false;
+}
+
+self.onmessage = (event: MessageEvent<CompressRequest>) => {
+  pending.set(event.data.id, event.data);
+  void processQueue();
 };
