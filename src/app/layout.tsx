@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import { I18nProvider } from "@/i18n";
 
 export const metadata: Metadata = {
@@ -157,6 +158,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning>
+        <ServiceWorkerRegistration />
         <I18nProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </I18nProvider>
