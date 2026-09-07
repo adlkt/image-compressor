@@ -66,8 +66,15 @@ export type Translations = {
   lang: string;
   footer: string;
   footerPrivacy: string;
+  footerTerms: string;
+  footerContact: string;
   counter: string;
   privacyPage: {
+    title: string;
+    intro: string;
+    sections: { title: string; content: string }[];
+  };
+  termsPage: {
     title: string;
     intro: string;
     sections: { title: string; content: string }[];
@@ -171,8 +178,10 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "浅色", dark: "深色", auto: "系统" },
     lang: "语言",
-    footer: "基于 Canvas API 构建 · 免费开源",
+    footer: "纯本地处理 · 免费使用 · Pro 解锁无限批量",
     footerPrivacy: "隐私政策",
+    footerTerms: "服务条款",
+    footerContact: "联系我们",
     counter: "已压缩超过 1,234,567 张图片",
     privacyPage: {
       title: "隐私政策",
@@ -202,7 +211,48 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "联系我们",
           content:
-            "如果你对隐私政策有任何疑问，请通过 GitHub Issues 联系我们。",
+            "如果你对隐私政策或本服务有任何疑问，请通过邮箱 a17637040895@gmail.com 或 GitHub Issues（https://github.com/adlkt/image-compressor/issues）联系我们。",
+        },
+      ],
+    },
+    termsPage: {
+      title: "服务条款",
+      intro: "最后更新：2026 年 9 月 8 日。使用本网站即表示你同意以下条款。",
+      sections: [
+        {
+          title: "服务说明",
+          content:
+            "Image Compressor 提供浏览器端图片压缩工具。免费版支持每批最多 10 张图片；Pro 版（一次性买断 $6）解锁无限批量处理、AVIF 输出等高级功能。",
+        },
+        {
+          title: "购买与许可",
+          content:
+            "Pro 版为一次性买断许可，订单与付款由我们的支付服务商 Creem（creem.io）作为商户记录方处理。购买后你将收到许可证密钥，用于在应用内激活 Pro 功能。许可证供购买者本人使用。",
+        },
+        {
+          title: "退款政策",
+          content:
+            "数字商品许可证一经激活通常不予退款。如遇支付问题或对购买有任何疑问，请在购买后 14 天内通过下方联系方式与我们沟通，我们会根据具体情况妥善处理。",
+        },
+        {
+          title: "知识产权",
+          content:
+            "Image Compressor 的名称、界面与代码受知识产权法律保护。你使用本工具处理的图片归你所有，我们不主张任何权利。",
+        },
+        {
+          title: "免责声明与责任限制",
+          content:
+            "本服务按「现状」提供。虽然所有压缩处理均在你的浏览器本地完成、图片不会上传，我们仍不对因使用本工具导致的任何数据损失承担责任。批量处理重要文件前请自行备份。",
+        },
+        {
+          title: "条款变更",
+          content:
+            "我们可能不时更新这些条款。变更后将在本页面发布并更新日期。变更后继续使用本服务即视为接受更新后的条款。",
+        },
+        {
+          title: "联系方式",
+          content:
+            "如有任何疑问，请通过邮箱 a17637040895@gmail.com 或 GitHub Issues（https://github.com/adlkt/image-compressor/issues）联系我们。",
         },
       ],
     },
@@ -341,8 +391,10 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "Light", dark: "Dark", auto: "System" },
     lang: "Language",
-    footer: "Built with Canvas API · Free & open source",
+    footer: "100% local processing · Free to use · Pro unlocks unlimited batches",
     footerPrivacy: "Privacy Policy",
+    footerTerms: "Terms of Service",
+    footerContact: "Contact Us",
     counter: "Over 1,234,567 images compressed",
     privacyPage: {
       title: "Privacy Policy",
@@ -372,7 +424,49 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "Contact Us",
           content:
-            "If you have any questions about this privacy policy, please contact us via GitHub Issues.",
+            "If you have any questions about this privacy policy or our service, please contact us at a17637040895@gmail.com or via GitHub Issues (https://github.com/adlkt/image-compressor/issues).",
+        },
+      ],
+    },
+    termsPage: {
+      title: "Terms of Service",
+      intro:
+        "Last updated: September 8, 2026. By using this website, you agree to the following terms.",
+      sections: [
+        {
+          title: "About the Service",
+          content:
+            "Image Compressor provides a browser-based image compression tool. The free plan processes up to 10 images per batch; the Pro plan (one-time purchase of $6) unlocks unlimited batch processing, AVIF output, and other advanced features.",
+        },
+        {
+          title: "Purchases & Licensing",
+          content:
+            "Pro is a one-time lifetime license. Orders and payments are processed by our Merchant of Record, Creem (creem.io). After purchase you will receive a license key to activate Pro features within the app. The license is for the purchaser's own use.",
+        },
+        {
+          title: "Refund Policy",
+          content:
+            "Digital license keys are generally non-refundable once activated. If you experience payment issues or have concerns about your purchase, please contact us within 14 days using the contact details below and we will work with you to resolve it.",
+        },
+        {
+          title: "Intellectual Property",
+          content:
+            "The name, interface, and code of Image Compressor are protected by intellectual property law. Images you process with this tool belong to you; we claim no rights over them.",
+        },
+        {
+          title: "Disclaimer & Limitation of Liability",
+          content:
+            "The service is provided \"as is\". Although all compression happens locally in your browser and images are never uploaded, we are not liable for any data loss resulting from use of this tool. Please back up important files before batch processing.",
+        },
+        {
+          title: "Changes to These Terms",
+          content:
+            "We may update these terms from time to time. Changes will be posted on this page with an updated date. Continued use of the service after changes constitutes acceptance of the updated terms.",
+        },
+        {
+          title: "Contact Us",
+          content:
+            "For any questions, please contact us at a17637040895@gmail.com or via GitHub Issues (https://github.com/adlkt/image-compressor/issues).",
         },
       ],
     },
@@ -517,8 +611,10 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "ライト", dark: "ダーク", auto: "システム" },
     lang: "言語",
-    footer: "Canvas API で構築 · 無料 & オープンソース",
+    footer: "完全ローカル処理 · 無料で利用可能 · Pro で無制限に",
     footerPrivacy: "プライバシーポリシー",
+    footerTerms: "利用規約",
+    footerContact: "お問い合わせ",
     counter: "1,234,567 枚以上の画像を圧縮",
     privacyPage: {
       title: "プライバシーポリシー",
@@ -548,7 +644,49 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "お問い合わせ",
           content:
-            "プライバシーポリシーについてご質問がある場合は、GitHub Issues からお問い合わせください。",
+            "プライバシーポリシーや本サービスについてご質問がある場合は、メール（a17637040895@gmail.com）または GitHub Issues（https://github.com/adlkt/image-compressor/issues）からお問い合わせください。",
+        },
+      ],
+    },
+    termsPage: {
+      title: "利用規約",
+      intro:
+        "最終更新日: 2026年9月8日。本サイトをご利用いただくことで、以下の規約に同意したものとみなされます。",
+      sections: [
+        {
+          title: "サービスについて",
+          content:
+            "Image Compressor はブラウザ内で動作する画像圧縮ツールです。無料版は 1 回あたり最大 10 枚まで、Pro 版（買い切り 6 ドル）は無制限の一括処理や AVIF 出力などの高度な機能を利用できます。",
+        },
+        {
+          title: "購入とライセンス",
+          content:
+            "Pro 版は買い切りの永久ライセンスです。注文と決済は、Merchant of Record である Creem（creem.io）が処理します。購入後、アプリ内で Pro 機能を有効化するためのライセンスキーが発行されます。ライセンスは購入者ご本人がご利用いただけます。",
+        },
+        {
+          title: "返金ポリシー",
+          content:
+            "デジタルライセンスキーは、一度認証されると原則として返金できません。決済に関する問題やご購入についてのご質問は、購入後 14 日以内に下記の連絡先までご連絡ください。状況に応じて柔軟に対応いたします。",
+        },
+        {
+          title: "知的財産権",
+          content:
+            "Image Compressor の名称・インターフェース・コードは知的財産法により保護されています。本ツールで処理された画像の権利はすべてユーザーに帰属し、当方が主張することはありません。",
+        },
+        {
+          title: "免責事項",
+          content:
+            "本サービスは「現状有姿」で提供されます。すべての圧縮処理はブラウザ内で完結し、画像がアップロードされることはありませんが、本ツールの利用によって生じたデータの損失について当方は責任を負いません。重要なファイルを一括処理する前に、必ずバックアップをお取りください。",
+        },
+        {
+          title: "規約の変更",
+          content:
+            "本規約は随時更新される場合があります。変更後は本ページに掲載し、日付を更新します。変更後も本サービスを継続利用された場合、更新後の規約に同意したものとみなされます。",
+        },
+        {
+          title: "お問い合わせ",
+          content:
+            "ご不明な点があれば、メール（a17637040895@gmail.com）または GitHub Issues（https://github.com/adlkt/image-compressor/issues）までご連絡ください。",
         },
       ],
     },

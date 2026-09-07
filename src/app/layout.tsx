@@ -96,11 +96,20 @@ export default function RootLayout({
               url: "https://image-compressor.314925.xyz",
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD",
-              },
+              offers: [
+                {
+                  "@type": "Offer",
+                  name: "Free",
+                  price: "0",
+                  priceCurrency: "USD",
+                },
+                {
+                  "@type": "Offer",
+                  name: "Pro",
+                  price: "6",
+                  priceCurrency: "USD",
+                },
+              ],
             }),
           }}
         />

@@ -7,9 +7,11 @@ import {
   type ChangeEvent,
   type DragEvent,
 } from "react";
-import { Check, ImagePlus, LockKeyhole } from "lucide-react";
+import { Check, Crown, ImagePlus, LockKeyhole } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useCompressor } from "@/lib/store";
+import { useLicense } from "@/lib/pro";
+import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { FileQueue } from "@/components/file-queue";
@@ -22,6 +24,7 @@ export default function Home() {
   const { t } = useI18n();
   const { files, addFiles, defaultFormat, defaultQuality, defaultMaxWidth } =
     useCompressor();
+  const openPricing = useLicense((s) => s.openPricing);
   const [dragOver, setDragOver] = useState(false);
 
   const handleFiles = useCallback(
@@ -175,6 +178,60 @@ export default function Home() {
                   </details>
                 ))}
               </div>
+            </div>
+          </section>
+
+          <section className="border-t bg-muted/20 px-5 py-16 sm:px-8">
+            <div className="mx-auto max-w-3xl">
+              <p className="mb-8 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                {t.nav.pricing}
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border bg-card p-6">
+                  <p className="text-sm font-medium">{t.pro.freeTitle}</p>
+                  <p className="mt-1 font-mono text-3xl font-semibold">$0</p>
+                  <ul className="mt-4 space-y-2">
+                    {t.pro.freeFeatures.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-1.5 text-xs text-muted-foreground"
+                      >
+                        <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="relative rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.04] p-6">
+                  <div className="absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white dark:bg-emerald-500 dark:text-neutral-950">
+                    <Crown className="size-3" />
+                    PRO
+                  </div>
+                  <p className="text-sm font-medium">{t.pro.proTitle}</p>
+                  <p className="mt-1 font-mono text-3xl font-semibold">
+                    {t.pro.price}
+                    <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                      {t.pro.priceNote}
+                    </span>
+                  </p>
+                  <ul className="mt-4 space-y-2">
+                    {t.pro.proFeatures.map((item) => (
+                      <li key={item} className="flex items-start gap-1.5 text-xs">
+                        <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={() => openPricing()}
+                className="mt-5 min-h-11 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-neutral-950 dark:hover:bg-emerald-400"
+              >
+                <Crown className="size-4" />
+                {t.pro.cta}
+              </Button>
             </div>
           </section>
         </main>
