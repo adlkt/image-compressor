@@ -1,7 +1,9 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useCompressor, type Format } from "@/lib/store";
+import { useLicense } from "@/lib/pro";
 import {
   Select,
   SelectContent,
@@ -26,6 +28,16 @@ export function SettingsBar() {
     setImageQuality,
     setImageMaxWidth,
   } = useCompressor();
+  const { isPro, openPricing } = useLicense();
+
+  const handleFormatChange = (value: string | null) => {
+    if (!value || !selectedFile) return;
+    if (value === "avif" && !isPro) {
+      openPricing("avif");
+      return;
+    }
+    setImageFormat(selectedFile.id, value as Format);
+  };
 
   if (!selectedId || !selectedFile) return null;
   const isPng = selectedFile.format === "png";
@@ -42,9 +54,7 @@ export function SettingsBar() {
           </label>
           <Select
             value={selectedFile.format}
-            onValueChange={(value) =>
-              setImageFormat(selectedFile.id, value as Format)
-            }
+            onValueChange={handleFormatChange}
           >
             <SelectTrigger className="min-h-10 w-full">
               <SelectValue />
@@ -52,7 +62,12 @@ export function SettingsBar() {
             <SelectContent>
               <SelectItem value="webp">WebP</SelectItem>
               <SelectItem value="jpeg">JPEG</SelectItem>
-              <SelectItem value="avif">AVIF</SelectItem>
+              <SelectItem value="avif">
+                <span className="flex items-center gap-1.5">
+                  AVIF
+                  {!isPro && <Lock className="size-3 text-muted-foreground" />}
+                </span>
+              </SelectItem>
               <SelectItem value="png">PNG</SelectItem>
             </SelectContent>
           </Select>

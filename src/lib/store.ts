@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { CompressResponse } from "./compress-protocol";
+import { FREE_BATCH_LIMIT, useLicense } from "./pro";
 
 export type Format = "webp" | "jpeg" | "avif" | "png";
 
@@ -152,7 +153,15 @@ export const useCompressor = create<State>((set, get) => ({
 
     if (unique.length === 0) return;
 
-    const entries: ImageFile[] = unique.map((file) => ({
+    // 免费版单批上限：超出部分触发升级弹窗
+    const { isPro, openPricing } = useLicense.getState();
+    const allowed = isPro
+      ? unique
+      : unique.slice(0, Math.max(0, FREE_BATCH_LIMIT - existing.length));
+    if (!isPro && unique.length > allowed.length) openPricing("batch");
+    if (allowed.length === 0) return;
+
+    const entries: ImageFile[] = allowed.map((file) => ({
       id: nextId(),
       file,
       originalUrl: URL.createObjectURL(file),

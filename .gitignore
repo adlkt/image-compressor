@@ -8,6 +8,10 @@
 # misc
 .DS_Store
 
+# env (secrets)
+.env*.local
+.env
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

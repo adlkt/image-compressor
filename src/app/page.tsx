@@ -16,6 +16,7 @@ import { FileQueue } from "@/components/file-queue";
 import { SettingsBar } from "@/components/settings-bar";
 import { PreviewPanel } from "@/components/preview-panel";
 import { SummaryBar } from "@/components/summary-bar";
+import { PricingModal } from "@/components/pricing-modal";
 
 export default function Home() {
   const { t } = useI18n();
@@ -193,6 +194,7 @@ export default function Home() {
       )}
 
       {!hasFiles && <Footer />}
+      <PricingModal />
     </div>
   );
 }

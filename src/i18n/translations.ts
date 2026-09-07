@@ -80,6 +80,22 @@ export type Translations = {
     title: string;
     items: { q: string; a: string }[];
   };
+  pro: {
+    title: string;
+    freeTitle: string;
+    proTitle: string;
+    price: string;
+    priceNote: string;
+    freeFeatures: string[];
+    proFeatures: string[];
+    cta: string;
+    licenseLabel: string;
+    licensePlaceholder: string;
+    activate: string;
+    invalid: string;
+    batch: { desc: string };
+    avif: { desc: string };
+  };
 };
 
 export const translations: Record<Lang, Translations> = {
@@ -222,6 +238,35 @@ export const translations: Record<Lang, Translations> = {
           a: "调整质量滑块可以控制画质。WebP/JPEG/AVIF 是有损压缩（但 90% 以上质量肉眼几乎看不出区别）。PNG 是无损压缩，不损失画质但文件较大。",
         },
       ],
+    },
+    pro: {
+      title: "升级到 Pro",
+      freeTitle: "免费",
+      proTitle: "Pro",
+      price: "$6",
+      priceNote: "买断",
+      freeFeatures: [
+        "每批最多 10 张",
+        "WebP / JPEG / PNG 输出",
+        "全部本地处理，零上传",
+      ],
+      proFeatures: [
+        "无限批量处理",
+        "AVIF 极限压缩输出",
+        "一次买断，永久有效",
+        "后续 Pro 功能免费获得",
+      ],
+      cta: "升级到 Pro",
+      licenseLabel: "已有许可证？输入激活码",
+      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
+      activate: "激活",
+      invalid: "激活码无效，请检查后重试",
+      batch: {
+        desc: "免费版每批最多处理 10 张图片。升级 Pro 解锁无限批量。",
+      },
+      avif: {
+        desc: "AVIF 在同画质下比 WebP 再小 20-30%，是 Pro 专属功能。",
+      },
     },
   },
   en: {
@@ -370,6 +415,35 @@ export const translations: Record<Lang, Translations> = {
         },
       ],
     },
+    pro: {
+      title: "Upgrade to Pro",
+      freeTitle: "Free",
+      proTitle: "Pro",
+      price: "$6",
+      priceNote: "one-time",
+      freeFeatures: [
+        "Up to 10 images per batch",
+        "WebP / JPEG / PNG output",
+        "100% local processing",
+      ],
+      proFeatures: [
+        "Unlimited batch size",
+        "AVIF ultra-compression output",
+        "One-time purchase, lifetime access",
+        "Free future Pro features",
+      ],
+      cta: "Upgrade to Pro",
+      licenseLabel: "Already have a license? Enter your key",
+      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
+      activate: "Activate",
+      invalid: "Invalid license key, please try again",
+      batch: {
+        desc: "The free plan processes up to 10 images per batch. Upgrade to Pro for unlimited batches.",
+      },
+      avif: {
+        desc: "AVIF is 20-30% smaller than WebP at equal quality — a Pro exclusive.",
+      },
+    },
   },
   ja: {
     title: "画像圧縮",
@@ -513,6 +587,35 @@ export const translations: Record<Lang, Translations> = {
           a: "品質スライダーで調整できます。WebP/JPEG/AVIF は非可逆圧縮（ただし 90% 以上なら肉眼ではほぼ区別できません）。PNG は可逆圧縮で画質劣化なし、ファイルサイズは大きめです。",
         },
       ],
+    },
+    pro: {
+      title: "Pro にアップグレード",
+      freeTitle: "無料",
+      proTitle: "Pro",
+      price: "$6",
+      priceNote: "買い切り",
+      freeFeatures: [
+        "1 回あたり最大 10 枚",
+        "WebP / JPEG / PNG 出力",
+        "すべてローカル処理",
+      ],
+      proFeatures: [
+        "無制限の一括処理",
+        "AVIF 超高圧縮出力",
+        "買い切りで永久利用可能",
+        "今後の Pro 機能も無料",
+      ],
+      cta: "Pro にアップグレード",
+      licenseLabel: "ライセンスキーをお持ちですか？",
+      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
+      activate: "認証",
+      invalid: "ライセンスキーが無効です。もう一度お試しください",
+      batch: {
+        desc: "無料版は 1 回あたり 10 枚まで処理できます。Pro にアップグレードすると無制限になります。",
+      },
+      avif: {
+        desc: "AVIF は同じ品質で WebP より 20-30% 小さくなる Pro 専用機能です。",
+      },
     },
   },
 };
