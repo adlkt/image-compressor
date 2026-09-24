@@ -24,7 +24,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## 约定
 - 压缩核心在 `src/lib/compress-worker.ts`，新增压缩算法/格式走这里，不要在组件里内联。
 - 新增 UI 原子组件用 `shadcn add`，保持 `src/components/ui` 单一来源。
-- 跑 `pnpm --filter image-compressor dev` 默认端口 3456（`NODE_OPTIONS='--no-deprecation'`）。
 - 根仓库 `AGENTS.md` 的 monorepo / submodule / 提交约定同样适用（本 app 是 git submodule）。
 
 ## 提交规范

@@ -1,8 +1,44 @@
 import { create } from "zustand";
 import type { CompressResponse } from "./compress-protocol";
-import { FREE_BATCH_LIMIT, useLicense } from "./pro";
 
-export type Format = "webp" | "jpeg" | "avif" | "png";
+export type Format = "webp" | "jpeg" | "png";
+export type RecipeId = "web" | "social" | "ecommerce" | "quality" | "custom";
+
+type PresetId = Exclude<RecipeId, "custom">;
+
+export const DELIVERY_RECIPES: Record<PresetId, {
+  format: Format;
+  quality: number;
+  maxWidth: number;
+  targetBytes: number | null;
+}> = {
+  web: { format: "webp", quality: 80, maxWidth: 1920, targetBytes: 500 * 1024 },
+  social: { format: "jpeg", quality: 85, maxWidth: 1200, targetBytes: 1024 * 1024 },
+  ecommerce: { format: "webp", quality: 85, maxWidth: 2048, targetBytes: 800 * 1024 },
+  quality: { format: "webp", quality: 95, maxWidth: 0, targetBytes: null },
+};
+
+/**
+ * 参数与某一档完全一致时返回那一档。
+ * 没有它，刷新后档位灯会全灭，而参数其实还是那一档的。
+ */
+export function matchRecipe(
+  format: Format,
+  quality: number,
+  maxWidth: number,
+  targetBytes: number | null,
+): RecipeId {
+  const found = (Object.keys(DELIVERY_RECIPES) as PresetId[]).find((id) => {
+    const recipe = DELIVERY_RECIPES[id];
+    return (
+      recipe.format === format &&
+      recipe.quality === quality &&
+      recipe.maxWidth === maxWidth &&
+      recipe.targetBytes === targetBytes
+    );
+  });
+  return found ?? "custom";
+}
 
 export type ImageFile = {
   id: string;
@@ -16,6 +52,9 @@ export type ImageFile = {
   format: Format;
   quality: number;
   maxWidth: number;
+  targetBytes: number | null;
+  outputQuality: number | null;
+  targetMet: boolean | null;
   compressing: boolean;
   error: string | null;
 };
@@ -31,29 +70,42 @@ type State = {
   defaultFormat: Format;
   defaultQuality: number;
   defaultMaxWidth: number;
+  defaultTargetBytes: number | null;
+  activeRecipeId: RecipeId;
   selectedFile: ImageFile | null;
 
   addFiles: (files: File[]) => void;
+  hydrateDefaults: () => void;
   removeFile: (id: string) => void;
   selectFile: (id: string) => void;
   setImageFormat: (id: string, format: Format) => void;
   setImageQuality: (id: string, quality: number) => void;
   setImageMaxWidth: (id: string, maxWidth: number) => void;
+  setImageTargetBytes: (id: string, targetBytes: number | null) => void;
+  applyRecipe: (recipeId: Exclude<RecipeId, "custom">) => void;
   compressImageFile: (id: string) => void;
   compressAll: () => void;
 };
 
 const DEFAULTS_KEY = "image-compressor:defaults";
 
+/**
+ * 首屏默认档位落在「Web 优化」上。
+ * 一打开就是一台已经调好的机器：尺子上有目标线可看，拖进来的图直接按这一档压。
+ */
+const WEB_PRESET = DELIVERY_RECIPES.web;
+
 type StoredDefaults = Partial<
-  Pick<State, "defaultFormat" | "defaultQuality" | "defaultMaxWidth">
+  Pick<State, "defaultFormat" | "defaultQuality" | "defaultMaxWidth" | "defaultTargetBytes">
 >;
 
 function loadDefaults(): StoredDefaults {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(DEFAULTS_KEY);
-    return raw ? (JSON.parse(raw) as StoredDefaults) : {};
+    const value = raw ? (JSON.parse(raw) as StoredDefaults) : {};
+    if (value.defaultFormat === ("avif" as Format)) value.defaultFormat = "webp";
+    return value;
   } catch {
     return {};
   }
@@ -67,8 +119,6 @@ function saveDefaults(values: StoredDefaults) {
     // ignore quota / private-mode errors
   }
 }
-
-const storedDefaults = loadDefaults();
 
 let worker: Worker | null = null;
 let requestCounter = 0;
@@ -102,11 +152,19 @@ function getWorker(
 
         if (event.data.type === "done") {
           const url = URL.createObjectURL(event.data.blob);
+          if (event.data.previewBlob) URL.revokeObjectURL(f.originalUrl);
           return {
             ...f,
+            originalUrl: event.data.previewBlob
+              ? URL.createObjectURL(event.data.previewBlob)
+              : f.originalUrl,
+            originalWidth: event.data.sourceWidth,
+            originalHeight: event.data.sourceHeight,
             compressedBlob: event.data.blob,
             compressedUrl: url,
             compressedSize: event.data.blob.size,
+            outputQuality: event.data.outputQuality,
+            targetMet: event.data.targetMet,
             compressing: false,
             error: null,
           };
@@ -135,13 +193,38 @@ function getWorker(
 export const useCompressor = create<State>((set, get) => ({
   files: [],
   selectedId: null,
-  defaultFormat: storedDefaults.defaultFormat ?? "jpeg",
-  defaultQuality: storedDefaults.defaultQuality ?? 80,
-  defaultMaxWidth: storedDefaults.defaultMaxWidth ?? 1920,
+  defaultFormat: WEB_PRESET.format,
+  defaultQuality: WEB_PRESET.quality,
+  defaultMaxWidth: WEB_PRESET.maxWidth,
+  defaultTargetBytes: WEB_PRESET.targetBytes,
+  activeRecipeId: "web",
   selectedFile: null,
 
+  hydrateDefaults: () => {
+    const defaults = loadDefaults();
+    const defaultFormat = defaults.defaultFormat ?? WEB_PRESET.format;
+    const defaultQuality = defaults.defaultQuality ?? WEB_PRESET.quality;
+    const defaultMaxWidth = defaults.defaultMaxWidth ?? WEB_PRESET.maxWidth;
+    const defaultTargetBytes =
+      defaults.defaultTargetBytes === undefined
+        ? WEB_PRESET.targetBytes
+        : defaults.defaultTargetBytes;
+    set({
+      defaultFormat,
+      defaultQuality,
+      defaultMaxWidth,
+      defaultTargetBytes,
+      activeRecipeId: matchRecipe(
+        defaultFormat,
+        defaultQuality,
+        defaultMaxWidth,
+        defaultTargetBytes,
+      ),
+    });
+  },
+
   addFiles: (newFiles: File[]) => {
-    const { defaultFormat, defaultQuality, defaultMaxWidth, files: existing } = get();
+    const { defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes, files: existing } = get();
 
     const seen = new Set(existing.map((f) => `${f.file.name}-${f.file.size}`));
     const unique = newFiles.filter((f) => {
@@ -153,15 +236,7 @@ export const useCompressor = create<State>((set, get) => ({
 
     if (unique.length === 0) return;
 
-    // 免费版单批上限：超出部分触发升级弹窗
-    const { isPro, openPricing } = useLicense.getState();
-    const allowed = isPro
-      ? unique
-      : unique.slice(0, Math.max(0, FREE_BATCH_LIMIT - existing.length));
-    if (!isPro && unique.length > allowed.length) openPricing("batch");
-    if (allowed.length === 0) return;
-
-    const entries: ImageFile[] = allowed.map((file) => ({
+    const entries: ImageFile[] = unique.map((file) => ({
       id: nextId(),
       file,
       originalUrl: URL.createObjectURL(file),
@@ -173,6 +248,9 @@ export const useCompressor = create<State>((set, get) => ({
       format: defaultFormat,
       quality: defaultQuality,
       maxWidth: defaultMaxWidth,
+      targetBytes: defaultTargetBytes,
+      outputQuality: null,
+      targetMet: null,
       compressing: false,
       error: null,
     }));
@@ -233,11 +311,12 @@ export const useCompressor = create<State>((set, get) => ({
       return {
         files,
         defaultFormat: format,
+        activeRecipeId: "custom",
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
-    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
-    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
+    const { defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes });
     // 格式是全局固定项：所有文件统一按新格式重新压缩
     get().files.forEach((f) => get().compressImageFile(f.id));
   },
@@ -250,11 +329,12 @@ export const useCompressor = create<State>((set, get) => ({
       return {
         files,
         defaultQuality: quality,
+        activeRecipeId: "custom",
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
-    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
-    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
+    const { defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes });
     clearQualityTimer(id);
     qualityTimers.set(
       id,
@@ -274,12 +354,53 @@ export const useCompressor = create<State>((set, get) => ({
       return {
         files,
         defaultMaxWidth: maxWidth,
+        activeRecipeId: "custom",
         selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
       };
     });
-    const { defaultFormat, defaultQuality, defaultMaxWidth } = get();
-    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth });
+    const { defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes });
     get().compressImageFile(id);
+  },
+
+  setImageTargetBytes: (id, targetBytes) => {
+    clearQualityTimer(id);
+    set((s) => {
+      const files = s.files.map((f) => f.id === id ? { ...f, targetBytes } : f);
+      return {
+        files,
+        defaultTargetBytes: targetBytes,
+        activeRecipeId: "custom",
+        selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
+      };
+    });
+    const { defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes } = get();
+    saveDefaults({ defaultFormat, defaultQuality, defaultMaxWidth, defaultTargetBytes });
+    get().compressImageFile(id);
+  },
+
+  applyRecipe: (recipeId) => {
+    const recipe = DELIVERY_RECIPES[recipeId];
+    get().files.forEach((file) => clearQualityTimer(file.id));
+    set((s) => {
+      const files = s.files.map((file) => ({ ...file, ...recipe }));
+      return {
+        files,
+        defaultFormat: recipe.format,
+        defaultQuality: recipe.quality,
+        defaultMaxWidth: recipe.maxWidth,
+        defaultTargetBytes: recipe.targetBytes,
+        activeRecipeId: recipeId,
+        selectedFile: files.find((f) => f.id === s.selectedId) ?? null,
+      };
+    });
+    saveDefaults({
+      defaultFormat: recipe.format,
+      defaultQuality: recipe.quality,
+      defaultMaxWidth: recipe.maxWidth,
+      defaultTargetBytes: recipe.targetBytes,
+    });
+    get().files.forEach((file) => get().compressImageFile(file.id));
   },
 
   compressImageFile: (id: string) => {
@@ -305,6 +426,7 @@ export const useCompressor = create<State>((set, get) => ({
       format: file.format,
       quality: file.quality,
       maxWidth: file.maxWidth,
+      targetBytes: file.targetBytes,
     });
   },
 

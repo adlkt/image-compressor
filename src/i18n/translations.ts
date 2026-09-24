@@ -5,22 +5,18 @@ export type { Lang } from "./locales";
 export type Translations = {
   title: string;
   description: string;
-  hero: string;
-  heroSub: string;
+  /** 铭牌上的一句话：这台机器是干什么的 */
+  tagline: string;
+  /** 关于这一段：说清它做什么、不做什么 */
+  about: string;
   features: {
     privacy: { title: string; desc: string };
     format: { title: string; desc: string };
     realtime: { title: string; desc: string };
   };
-  nav: {
-    pricing: string;
-    docs: string;
-    api: string;
-    login: string;
-  };
   dropzone: {
     title: string;
-    subtitle: string;
+    paste: string;
   };
   controls: {
     presets: string;
@@ -41,6 +37,17 @@ export type Translations = {
     allDone: string;
     failedItems: string;
     retry: string;
+    targetSize: string;
+    targetSizeHint: string;
+    targetSizePng: string;
+    targetMet: string;
+    targetMissed: string;
+    batchNaming: string;
+    namingTemplate: string;
+    namingHint: string;
+    filenameExample: string;
+    exportPreparing: string;
+    exportError: string;
   };
   presets: {
     presetWeb: string;
@@ -68,7 +75,10 @@ export type Translations = {
   footerPrivacy: string;
   footerTerms: string;
   footerContact: string;
-  counter: string;
+  gauge: {
+    range: string;
+    idle: string;
+  };
   privacyPage: {
     title: string;
     intro: string;
@@ -87,54 +97,32 @@ export type Translations = {
     title: string;
     items: { q: string; a: string }[];
   };
-  pro: {
-    title: string;
-    freeTitle: string;
-    proTitle: string;
-    price: string;
-    priceNote: string;
-    freeFeatures: string[];
-    proFeatures: string[];
-    cta: string;
-    licenseLabel: string;
-    licensePlaceholder: string;
-    activate: string;
-    invalid: string;
-    batch: { desc: string };
-    avif: { desc: string };
-  };
 };
 
 export const translations: Record<Lang, Translations> = {
   zh: {
     title: "图片压缩",
-    description: "纯浏览器端图片压缩 · 零上传 · 隐私安全",
-    hero: "拖拽、粘贴或点击，即刻压缩",
-    heroSub:
-      "专为高分辨率截图优化。WebP / AVIF / PNG / JPEG，批量处理。所有处理在本地浏览器完成，图片不会被上传到任何服务器。",
+    description: "HEIC / HEIF / JPEG / PNG / WebP",
+    tagline: "压缩、改尺寸、换格式，全程在浏览器里完成",
+    about:
+      "iPhone 的 HEIC 照片和 macOS 的大截图都能直接拖进来，压缩、改尺寸、换格式一次处理完。所有计算都在这台设备上完成——图片不会离开浏览器，也没有可以上传的地方。",
     features: {
       privacy: {
         title: "隐私优先",
-        desc: "所有处理在浏览器本地完成，图片永不离开你的设备。",
+        desc: "本地处理，不上传。",
       },
       format: {
         title: "多格式支持",
-        desc: "WebP / AVIF / PNG / JPEG。PNG 保留透明通道。AVIF 体积最小但编码较慢。",
+        desc: "支持 HEIC / HEIF 输入，输出 WebP / PNG / JPEG。",
       },
       realtime: {
         title: "实时预览",
         desc: "拖动质量滑块，所有图片即时重新压缩，效果立即可见。",
       },
     },
-    nav: {
-      pricing: "定价",
-      docs: "文档",
-      api: "API",
-      login: "登录",
-    },
     dropzone: {
-      title: "拖拽图片到此处",
-      subtitle: "或点击选择 / 粘贴截图 (Ctrl+V) · 支持批量",
+      title: "把图片拖进来",
+      paste: "拖进来，或者直接粘贴截图",
     },
     controls: {
       presets: "预设",
@@ -150,11 +138,22 @@ export const translations: Record<Lang, Translations> = {
       wait: "选择图片查看预览",
       compressing: "压缩中",
       files: "个文件",
-      add: "添加",
+      add: "选择图片",
       processing: "压缩中",
       allDone: "已完成",
       failedItems: "失败 {count} 项",
       retry: "点击重试",
+      targetSize: "目标大小",
+      targetSizeHint: "留空则只按质量压缩，范围 20–10240 KB",
+      targetSizePng: "PNG 不支持按目标大小寻优",
+      targetMet: "已达到大小目标",
+      targetMissed: "已用最低质量，仍高于目标",
+      batchNaming: "批量命名",
+      namingTemplate: "文件名模板",
+      namingHint: "可用：{name} 原名、{n} 序号、{width}、{height}",
+      filenameExample: "实时示例",
+      exportPreparing: "正在打包",
+      exportError: "打包失败，请重试",
     },
     presets: {
       presetWeb: "Web 优化",
@@ -178,11 +177,14 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "浅色", dark: "深色", auto: "系统" },
     lang: "语言",
-    footer: "纯本地处理 · 免费使用 · Pro 解锁无限批量",
+    footer: "纯本地处理 · 图片不会上传 · 免费使用",
     footerPrivacy: "隐私政策",
     footerTerms: "服务条款",
     footerContact: "联系我们",
-    counter: "已压缩超过 1,234,567 张图片",
+    gauge: {
+      range: "量程",
+      idle: "把图片放进下面的进料口，这里会显示量到的体积。",
+    },
     privacyPage: {
       title: "隐私政策",
       intro:
@@ -196,12 +198,12 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "本地存储",
           content:
-            "我们使用浏览器存储仅保存你的语言偏好（中文/英文/日文）和主题设置（浅色/深色）。这些信息只用于恢复你的界面偏好，不会被我们出售或用于追踪。",
+            "我们使用浏览器存储保存语言、主题和压缩默认值。这些信息只用于恢复你的设置，不包含图片内容，也不会被出售或用于广告追踪。",
         },
         {
           title: "广告与第三方服务",
           content:
-            "我们可能在页面中展示广告（如 Google AdSense）。这些第三方广告商可能使用 Cookie 来提供相关广告。这些 Cookie 由广告商管理，不受我们控制。你可以在浏览器设置中管理或禁用 Cookie。",
+            "当前版本不展示广告，也不接入第三方广告追踪服务。如果未来发生变化，我们会先更新本政策并明确说明。",
         },
         {
           title: "分析工具",
@@ -222,17 +224,17 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "服务说明",
           content:
-            "Image Compressor 提供浏览器端图片压缩工具。免费版支持每批最多 10 张图片；Pro 版（一次性买断 $6）解锁无限批量处理、AVIF 输出等高级功能。",
+            "Image Compressor 提供浏览器端图片压缩与格式转换工具。处理能力取决于设备内存和浏览器限制。",
         },
         {
-          title: "购买与许可",
+          title: "使用方式",
           content:
-            "Pro 版为一次性买断许可，订单与付款由我们的支付服务商 Creem（creem.io）作为商户记录方处理。购买后你将收到许可证密钥，用于在应用内激活 Pro 功能。许可证供购买者本人使用。",
+            "本工具当前免费使用，不提供付费套餐、订阅或许可证。请仅处理你有权使用的图片。",
         },
         {
-          title: "退款政策",
+          title: "问题反馈",
           content:
-            "数字商品许可证一经激活通常不予退款。如遇支付问题或对购买有任何疑问，请在购买后 14 天内通过下方联系方式与我们沟通，我们会根据具体情况妥善处理。",
+            "如遇功能问题或对使用条款有疑问，请通过下方联系方式与我们沟通。",
         },
         {
           title: "知识产权",
@@ -273,81 +275,46 @@ export const translations: Record<Lang, Translations> = {
         },
         {
           q: "支持哪些图片格式？",
-          a: "输入支持所有浏览器能打开的图片格式（JPG、PNG、GIF、WebP、AVIF、BMP 等）。输出可选择 WebP、AVIF、PNG 或 JPEG。",
+          a: "输入支持 iPhone HEIC/HEIF 和浏览器能够解码的静态图片格式。输出可选择 WebP、PNG 或 JPEG。动画图片会按静态图片处理。",
         },
         {
-          q: "WebP 和 AVIF 有什么区别？",
-          a: "AVIF 压缩率更高（同质量下体积比 WebP 小 20-30%），但编码速度较慢。WebP 兼容性更好，编码更快。日常使用推荐 WebP，追求极限压缩选 AVIF。",
+          q: "为什么暂不提供 AVIF 输出？",
+          a: "浏览器可以显示 AVIF，并不代表能够可靠地编码 AVIF。我们会在编码能力经过验证后再提供，避免生成格式错误的文件。",
         },
         {
           q: "PNG 会保留透明背景吗？",
-          a: "会。PNG 格式完整保留 alpha 透明通道。JPEG 不支持透明，WebP 和 AVIF 也支持透明。",
+          a: "会。PNG 格式完整保留 alpha 透明通道。JPEG 不支持透明，WebP 支持透明。",
         },
         {
           q: "压缩会损失画质吗？",
-          a: "调整质量滑块可以控制画质。WebP/JPEG/AVIF 是有损压缩（但 90% 以上质量肉眼几乎看不出区别）。PNG 是无损压缩，不损失画质但文件较大。",
+          a: "调整质量滑块可以控制 WebP/JPEG 的画质与体积。PNG 输出不使用质量滑块，文件通常更大。",
         },
       ],
-    },
-    pro: {
-      title: "升级到 Pro",
-      freeTitle: "免费",
-      proTitle: "Pro",
-      price: "$6",
-      priceNote: "买断",
-      freeFeatures: [
-        "每批最多 10 张",
-        "WebP / JPEG / PNG 输出",
-        "全部本地处理，零上传",
-      ],
-      proFeatures: [
-        "无限批量处理",
-        "AVIF 极限压缩输出",
-        "一次买断，永久有效",
-        "后续 Pro 功能免费获得",
-      ],
-      cta: "升级到 Pro",
-      licenseLabel: "已有许可证？输入激活码",
-      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
-      activate: "激活",
-      invalid: "激活码无效，请检查后重试",
-      batch: {
-        desc: "免费版每批最多处理 10 张图片。升级 Pro 解锁无限批量。",
-      },
-      avif: {
-        desc: "AVIF 在同画质下比 WebP 再小 20-30%，是 Pro 专属功能。",
-      },
     },
   },
   en: {
     title: "Image Compressor",
-    description: "Client-side image compression · Zero upload · Privacy first",
-    hero: "Drag, paste, or click to compress",
-    heroSub:
-      "Optimized for high-res screenshots. WebP / AVIF / PNG / JPEG, batch processing. All compression happens in your browser — nothing uploaded.",
+    description: "HEIC / HEIF / JPEG / PNG / WebP",
+    tagline: "Compress, resize, and convert — all inside your browser",
+    about:
+      "Drop in iPhone HEIC photos and oversized macOS screenshots, then compress, resize, and convert them in one pass. Every calculation runs on this device: your images never leave the browser, and there is nowhere for them to be uploaded.",
     features: {
       privacy: {
         title: "Privacy First",
-        desc: "All processing is done locally. Images never leave your device.",
+        desc: "Processed locally. Never uploaded.",
       },
       format: {
         title: "Multi-Format",
-        desc: "WebP / AVIF / PNG / JPEG. PNG preserves alpha channel. AVIF offers smallest size.",
+        desc: "HEIC / HEIF input with WebP / PNG / JPEG output.",
       },
       realtime: {
         title: "Live Preview",
         desc: "Adjust quality and see results instantly across all images.",
       },
     },
-    nav: {
-      pricing: "Pricing",
-      docs: "Docs",
-      api: "API",
-      login: "Login",
-    },
     dropzone: {
-      title: "Drop your images here",
-      subtitle: "or click to browse / paste (Ctrl+V) · batch supported",
+      title: "Drop images here",
+      paste: "Drop them in, or paste a screenshot",
     },
     controls: {
       presets: "Presets",
@@ -363,11 +330,22 @@ export const translations: Record<Lang, Translations> = {
       wait: "Select an image to preview",
       compressing: "Compressing",
       files: "files",
-      add: "Add",
+      add: "Choose images",
       processing: "Processing",
       allDone: "All done",
       failedItems: "{count} failed",
       retry: "Click to retry",
+      targetSize: "Target size",
+      targetSizeHint: "Leave blank to use quality only · 20–10240 KB",
+      targetSizePng: "Target-size optimization is unavailable for PNG",
+      targetMet: "Size target met",
+      targetMissed: "Still above target at minimum quality",
+      batchNaming: "Batch naming",
+      namingTemplate: "Filename template",
+      namingHint: "Tokens: {name}, {n}, {width}, {height}",
+      filenameExample: "Live example",
+      exportPreparing: "Preparing package",
+      exportError: "Package creation failed. Try again.",
     },
     presets: {
       presetWeb: "Web optimized",
@@ -391,11 +369,14 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "Light", dark: "Dark", auto: "System" },
     lang: "Language",
-    footer: "100% local processing · Free to use · Pro unlocks unlimited batches",
+    footer: "100% local processing · Images never upload · Free to use",
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
     footerContact: "Contact Us",
-    counter: "Over 1,234,567 images compressed",
+    gauge: {
+      range: "Range",
+      idle: "Feed an image in below and this scale will show what it measures.",
+    },
     privacyPage: {
       title: "Privacy Policy",
       intro:
@@ -409,12 +390,12 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "Local Storage",
           content:
-            "We use browser storage only to save your language preference (Chinese/English/Japanese) and theme setting (light/dark). This data is used to restore your UI preferences and is never sold or used for tracking.",
+            "Browser storage keeps your language, theme, and compression defaults. This only restores your settings, contains no image content, and is not sold or used for advertising tracking.",
         },
         {
           title: "Advertising & Third Parties",
           content:
-            "We may display advertisements (such as Google AdSense) on the page. These third-party advertisers may use cookies to serve relevant ads. These cookies are managed by the advertiser, not by us. You can manage or disable cookies in your browser settings.",
+            "The current version shows no advertising and uses no third-party advertising trackers. If that changes, we will update this policy and explain it clearly first.",
         },
         {
           title: "Analytics",
@@ -436,17 +417,17 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "About the Service",
           content:
-            "Image Compressor provides a browser-based image compression tool. The free plan processes up to 10 images per batch; the Pro plan (one-time purchase of $6) unlocks unlimited batch processing, AVIF output, and other advanced features.",
+            "Image Compressor provides browser-based image compression and format conversion. Practical capacity depends on device memory and browser limits.",
         },
         {
-          title: "Purchases & Licensing",
+          title: "Use of the Service",
           content:
-            "Pro is a one-time lifetime license. Orders and payments are processed by our Merchant of Record, Creem (creem.io). After purchase you will receive a license key to activate Pro features within the app. The license is for the purchaser's own use.",
+            "The tool is currently free to use and does not offer paid plans, subscriptions, or licenses. Only process images you are authorized to use.",
         },
         {
-          title: "Refund Policy",
+          title: "Support",
           content:
-            "Digital license keys are generally non-refundable once activated. If you experience payment issues or have concerns about your purchase, please contact us within 14 days using the contact details below and we will work with you to resolve it.",
+            "If you experience a functional issue or have questions about these terms, contact us using the details below.",
         },
         {
           title: "Intellectual Property",
@@ -456,7 +437,7 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "Disclaimer & Limitation of Liability",
           content:
-            "The service is provided \"as is\". Although all compression happens locally in your browser and images are never uploaded, we are not liable for any data loss resulting from use of this tool. Please back up important files before batch processing.",
+            'The service is provided "as is". Although all compression happens locally in your browser and images are never uploaded, we are not liable for any data loss resulting from use of this tool. Please back up important files before batch processing.',
         },
         {
           title: "Changes to These Terms",
@@ -493,81 +474,46 @@ export const translations: Record<Lang, Translations> = {
         },
         {
           q: "Which formats are supported?",
-          a: "Input supports all image formats browsers can open (JPG, PNG, GIF, WebP, AVIF, BMP, etc.). Output choices: WebP, AVIF, PNG, or JPEG.",
+          a: "Input supports iPhone HEIC/HEIF and static image formats your browser can decode. Output choices are WebP, PNG, or JPEG. Animated images are processed as still images.",
         },
         {
-          q: "What's the difference between WebP and AVIF?",
-          a: "AVIF compresses better (20-30% smaller than WebP at equal quality), but encodes slower. WebP has wider compatibility and faster encoding. Use WebP for daily use, AVIF for smallest file size.",
+          q: "Why isn't AVIF output available yet?",
+          a: "A browser may display AVIF without being able to encode it reliably. We will only offer AVIF after the encoder is verified, so downloads always match their stated format.",
         },
         {
           q: "Does PNG preserve transparency?",
-          a: "Yes. PNG fully preserves the alpha channel. JPEG does not support transparency. WebP and AVIF also support transparency.",
+          a: "Yes. PNG fully preserves the alpha channel. JPEG does not support transparency, while WebP does.",
         },
         {
           q: "Does compression reduce image quality?",
-          a: "Adjust the quality slider to control the trade-off. WebP/JPEG/AVIF are lossy (but 90%+ quality is nearly indistinguishable). PNG is lossless — no quality loss but larger files.",
+          a: "Adjust the quality slider to control WebP/JPEG quality and size. PNG output does not use the quality slider and is usually larger.",
         },
       ],
-    },
-    pro: {
-      title: "Upgrade to Pro",
-      freeTitle: "Free",
-      proTitle: "Pro",
-      price: "$6",
-      priceNote: "one-time",
-      freeFeatures: [
-        "Up to 10 images per batch",
-        "WebP / JPEG / PNG output",
-        "100% local processing",
-      ],
-      proFeatures: [
-        "Unlimited batch size",
-        "AVIF ultra-compression output",
-        "One-time purchase, lifetime access",
-        "Free future Pro features",
-      ],
-      cta: "Upgrade to Pro",
-      licenseLabel: "Already have a license? Enter your key",
-      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
-      activate: "Activate",
-      invalid: "Invalid license key, please try again",
-      batch: {
-        desc: "The free plan processes up to 10 images per batch. Upgrade to Pro for unlimited batches.",
-      },
-      avif: {
-        desc: "AVIF is 20-30% smaller than WebP at equal quality — a Pro exclusive.",
-      },
     },
   },
   ja: {
     title: "画像圧縮",
-    description: "ブラウザ内で画像圧縮 · アップロード不要 · プライバシー重視",
-    hero: "ドラッグ＆ドロップでまとめて圧縮",
-    heroSub:
-      "高解像度スクリーンショットに最適化。WebP / AVIF / PNG / JPEG、一括処理対応。すべてブラウザ内で処理され、画像は一切アップロードされません。",
+    description: "HEIC / HEIF / JPEG / PNG / WebP",
+    tagline: "圧縮・リサイズ・形式変換を、ブラウザだけで",
+    about:
+      "iPhone の HEIC 写真も macOS の大きなスクリーンショットもそのまま追加でき、圧縮・リサイズ・形式変換を一度に処理します。計算はすべてこのデバイス上で行われ、画像がブラウザの外に出ることはありません。",
     features: {
       privacy: {
         title: "プライバシー第一",
-        desc: "すべての処理はブラウザ内で行われ、画像が外部に出ることはありません。",
+        desc: "端末内で処理。アップロードなし。",
       },
       format: {
         title: "マルチフォーマット",
-        desc: "WebP / AVIF / PNG / JPEG。PNG はアルファチャンネル保持。AVIF は最小サイズ。",
+        desc: "HEIC / HEIF 入力、WebP / PNG / JPEG 出力に対応。",
       },
       realtime: {
         title: "リアルタイムプレビュー",
         desc: "品質スライダーの調整で、すべての画像が即座に再圧縮されます。",
       },
     },
-    nav: {
-      pricing: "料金",
-      docs: "ドキュメント",
-      api: "API",
-      login: "ログイン",
-    },
     dropzone: {
       title: "画像をここにドロップ",
-      subtitle: "またはクリック / 貼り付け (Ctrl+V) · 一括対応",
+      paste: "ドロップ、またはスクリーンショットを貼り付け",
     },
     controls: {
       presets: "プリセット",
@@ -583,11 +529,22 @@ export const translations: Record<Lang, Translations> = {
       wait: "画像を選択してプレビュー",
       compressing: "圧縮中",
       files: "ファイル",
-      add: "追加",
+      add: "画像を選択",
       processing: "処理中",
       allDone: "完了",
       failedItems: "{count} 件失敗",
       retry: "クリックで再試行",
+      targetSize: "目標サイズ",
+      targetSizeHint: "空欄は品質のみ · 20〜10240 KB",
+      targetSizePng: "PNG は目標サイズ最適化に対応していません",
+      targetMet: "サイズ目標を達成",
+      targetMissed: "最低品質でも目標を超えています",
+      batchNaming: "一括命名",
+      namingTemplate: "ファイル名テンプレート",
+      namingHint: "使用可能：{name}、{n}、{width}、{height}",
+      filenameExample: "プレビュー",
+      exportPreparing: "パッケージ作成中",
+      exportError: "パッケージ作成に失敗しました",
     },
     presets: {
       presetWeb: "ウェブ最適化",
@@ -611,11 +568,14 @@ export const translations: Record<Lang, Translations> = {
     },
     theme: { light: "ライト", dark: "ダーク", auto: "システム" },
     lang: "言語",
-    footer: "完全ローカル処理 · 無料で利用可能 · Pro で無制限に",
+    footer: "完全ローカル処理 · 画像はアップロードされません · 無料で利用可能",
     footerPrivacy: "プライバシーポリシー",
     footerTerms: "利用規約",
     footerContact: "お問い合わせ",
-    counter: "1,234,567 枚以上の画像を圧縮",
+    gauge: {
+      range: "レンジ",
+      idle: "下の投入口に画像を入れると、ここに計測結果が表示されます。",
+    },
     privacyPage: {
       title: "プライバシーポリシー",
       intro:
@@ -629,12 +589,12 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "ローカルストレージ",
           content:
-            "ブラウザストレージは、言語設定（中国語/英語/日本語）とテーマ設定（ライト/ダーク）の保存にのみ使用します。このデータは UI 設定の復元にのみ使われ、販売や追跡には使用しません。",
+            "ブラウザストレージには言語、テーマ、圧縮の初期設定を保存します。設定の復元にのみ使われ、画像内容は含まず、販売や広告追跡には使用しません。",
         },
         {
           title: "広告とサードパーティ",
           content:
-            "ページ内に広告（Google AdSense など）を表示する場合があります。これらのサードパーティ広告主は、関連広告を配信するために Cookie を使用することがあります。これらの Cookie は広告主によって管理され、当方の管理下にはありません。ブラウザ設定で Cookie を管理または無効化できます。",
+            "現在のバージョンでは広告を表示せず、第三者の広告トラッカーも使用しません。将来変更する場合は、事前に本ポリシーを更新し、明確に説明します。",
         },
         {
           title: "分析ツール",
@@ -656,17 +616,17 @@ export const translations: Record<Lang, Translations> = {
         {
           title: "サービスについて",
           content:
-            "Image Compressor はブラウザ内で動作する画像圧縮ツールです。無料版は 1 回あたり最大 10 枚まで、Pro 版（買い切り 6 ドル）は無制限の一括処理や AVIF 出力などの高度な機能を利用できます。",
+            "Image Compressor はブラウザ内で動作する画像圧縮・形式変換ツールです。処理容量は端末のメモリとブラウザの制限に依存します。",
         },
         {
-          title: "購入とライセンス",
+          title: "利用方法",
           content:
-            "Pro 版は買い切りの永久ライセンスです。注文と決済は、Merchant of Record である Creem（creem.io）が処理します。購入後、アプリ内で Pro 機能を有効化するためのライセンスキーが発行されます。ライセンスは購入者ご本人がご利用いただけます。",
+            "このツールは現在無料で利用でき、有料プラン、サブスクリプション、ライセンスは提供していません。使用権限のある画像のみ処理してください。",
         },
         {
-          title: "返金ポリシー",
+          title: "サポート",
           content:
-            "デジタルライセンスキーは、一度認証されると原則として返金できません。決済に関する問題やご購入についてのご質問は、購入後 14 日以内に下記の連絡先までご連絡ください。状況に応じて柔軟に対応いたします。",
+            "機能上の問題や利用規約についてご質問がある場合は、下記の連絡先までお問い合わせください。",
         },
         {
           title: "知的財産権",
@@ -710,50 +670,21 @@ export const translations: Record<Lang, Translations> = {
         },
         {
           q: "どのフォーマットに対応していますか？",
-          a: "入力はブラウザが開けるすべての画像形式（JPG、PNG、GIF、WebP、AVIF、BMP など）に対応。出力は WebP、AVIF、PNG、JPEG から選択可能です。",
+          a: "iPhone の HEIC/HEIF とブラウザがデコードできる静止画像形式に対応。出力は WebP、PNG、JPEG から選択できます。アニメーション画像は静止画として処理されます。",
         },
         {
-          q: "WebP と AVIF の違いは？",
-          a: "AVIF は圧縮率が高く（同じ品質で WebP より 20-30% 小さい）、エンコードが遅めです。WebP は互換性が高くエンコードが高速。日常使用は WebP、最小サイズを求めるなら AVIF。",
+          q: "AVIF 出力がまだ利用できないのはなぜですか？",
+          a: "ブラウザが AVIF を表示できても、安定してエンコードできるとは限りません。ダウンロード形式の正確性を保証できるよう、検証後に提供します。",
         },
         {
           q: "PNG は透明背景を保持しますか？",
-          a: "はい。PNG はアルファ透明チャンネルを完全に保持します。JPEG は透明非対応。WebP と AVIF も透明対応です。",
+          a: "はい。PNG はアルファ透明チャンネルを完全に保持します。JPEG は透明非対応で、WebP は透明対応です。",
         },
         {
           q: "圧縮で画質は劣化しますか？",
-          a: "品質スライダーで調整できます。WebP/JPEG/AVIF は非可逆圧縮（ただし 90% 以上なら肉眼ではほぼ区別できません）。PNG は可逆圧縮で画質劣化なし、ファイルサイズは大きめです。",
+          a: "品質スライダーで WebP/JPEG の画質とサイズを調整できます。PNG 出力では品質スライダーを使用せず、通常はサイズが大きくなります。",
         },
       ],
-    },
-    pro: {
-      title: "Pro にアップグレード",
-      freeTitle: "無料",
-      proTitle: "Pro",
-      price: "$6",
-      priceNote: "買い切り",
-      freeFeatures: [
-        "1 回あたり最大 10 枚",
-        "WebP / JPEG / PNG 出力",
-        "すべてローカル処理",
-      ],
-      proFeatures: [
-        "無制限の一括処理",
-        "AVIF 超高圧縮出力",
-        "買い切りで永久利用可能",
-        "今後の Pro 機能も無料",
-      ],
-      cta: "Pro にアップグレード",
-      licenseLabel: "ライセンスキーをお持ちですか？",
-      licensePlaceholder: "XXXX-XXXX-XXXX-XXXX",
-      activate: "認証",
-      invalid: "ライセンスキーが無効です。もう一度お試しください",
-      batch: {
-        desc: "無料版は 1 回あたり 10 枚まで処理できます。Pro にアップグレードすると無制限になります。",
-      },
-      avif: {
-        desc: "AVIF は同じ品質で WebP より 20-30% 小さくなる Pro 専用機能です。",
-      },
     },
   },
 };

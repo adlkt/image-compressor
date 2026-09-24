@@ -2,154 +2,177 @@
 
 import { AlertTriangle, Check, Loader2, Plus, X } from "lucide-react";
 import { useCompressor } from "@/lib/store";
+import { isSupportedImageInput } from "@/lib/image-input";
+import { compressionRatio, formatDelta, formatSize } from "@/lib/format";
+import { batchDomain } from "@/lib/scale";
 import { useI18n } from "@/i18n";
+import { RangeGauge } from "./range-gauge";
 
-function formatSize(size: number) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
+/**
+ * 批处理清单。
+ *
+ * 每一行都是一帧：帧号、缩略图、名称，以及这一帧自己的读数。
+ * 整批共用一把尺（`batchDomain`）——一列尺子对齐之后，压缩情况可以被扫视比较，
+ * 而不是变成一堆各自量程、各自为政的卡片。
+ */
 export function FileQueue() {
   const { files, selectedId, selectFile, removeFile, addFiles, compressImageFile } =
     useCompressor();
   const { t } = useI18n();
 
-  const handleThumbClick = (id: string, hasError: boolean) => {
-    if (hasError) {
-      compressImageFile(id);
-    } else {
-      selectFile(id);
-    }
-  };
+  const domain = batchDomain(
+    files.map((file) => ({
+      original: file.file.size,
+      compressed: file.compressedSize,
+      target: file.targetBytes,
+    })),
+  );
 
   return (
     <section
-      className="rounded-2xl border bg-card p-3 shadow-sm"
+      className="flex max-h-56 min-h-0 flex-col border-b border-border lg:max-h-none lg:border-b-0 lg:border-r"
       aria-label={t.controls.files}
     >
-      <div className="mb-2 flex items-center justify-between px-1">
-        <p className="text-xs font-medium text-muted-foreground">
+      <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
+        <span data-silk className="panel-label">
           {files.length} {t.controls.files}
-        </p>
+        </span>
         <label
           htmlFor="file-input-queue"
-          className="flex min-h-10 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="flex min-h-8 cursor-pointer items-center gap-1 rounded-[3px] px-2 text-xs text-muted-foreground outline-none transition-colors hover:text-foreground focus-within:ring-2 focus-within:ring-ring/40"
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" aria-hidden="true" />
           {t.controls.add}
         </label>
         <input
           id="file-input-queue"
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif"
           multiple
           className="sr-only"
           onChange={(event) => {
             addFiles(
-              Array.from(event.target.files ?? []).filter((file) =>
-                file.type.startsWith("image/"),
-              ),
+              Array.from(event.target.files ?? []).filter(isSupportedImageInput),
             );
             event.target.value = "";
           }}
         />
-      </div>
+      </header>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {files.map((file) => {
+      <ol className="min-h-0 flex-1 overflow-y-auto">
+        {files.map((file, index) => {
           const isSelected = file.id === selectedId;
           const hasError = !!file.error;
-          const ratio = file.compressedSize
-            ? Math.round((1 - file.compressedSize / file.file.size) * 100)
-            : null;
+          const ratio = compressionRatio(file.file.size, file.compressedSize);
 
           return (
-            <div
-              key={file.id}
-              className={`group relative w-36 shrink-0 overflow-hidden rounded-xl border transition-colors ${
-                isSelected
-                  ? "border-foreground bg-accent/70"
-                  : hasError
-                    ? "border-red-500/50 hover:bg-accent/40"
-                    : "border-border hover:bg-accent/40"
-              }`}
-            >
+            <li key={file.id} className="group relative border-b border-border">
               <button
                 type="button"
-                onClick={() => handleThumbClick(file.id, hasError)}
-                className="block w-full p-2 text-left"
+                onClick={() =>
+                  hasError ? compressImageFile(file.id) : selectFile(file.id)
+                }
                 aria-pressed={isSelected}
                 aria-label={
                   hasError ? `${t.controls.retry} ${file.file.name}` : file.file.name
                 }
+                className={`flex w-full items-start gap-2.5 py-2 pr-7 pl-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/40 ${
+                  // 选中不由底色承担：底色留给 hover，选中靠左边线与帧号。
+                  // 填色会把「当前项」和「可点区域」搅在一起。
+                  isSelected ? "" : "hover:bg-accent/40"
+                }`}
               >
-                <span className="relative block aspect-[4/3] overflow-hidden rounded-lg bg-muted">
-                  <img
-                    src={file.originalUrl}
-                    alt=""
-                    className="size-full object-cover"
-                  />
+                {/* 活动项：1px 信号色边线 + 帧号跟着变色，不是一条彩色侧条 */}
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-0 bottom-0 left-0 w-px bg-primary transition-opacity ${
+                    isSelected ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+
+                <span
+                  data-numeric
+                  className={`w-4 shrink-0 pt-0.5 text-[10px] leading-4 transition-colors ${
+                    isSelected ? "text-signal" : "text-muted-foreground"
+                  }`}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <span className="relative size-8 shrink-0 overflow-hidden rounded-[2px] border border-border bg-muted">
+                  <img src={file.originalUrl} alt="" className="size-full object-cover" />
                   {file.compressing && (
-                    <span
-                      className="absolute inset-0 flex items-center justify-center bg-background/70"
-                      aria-live="polite"
-                    >
-                      <Loader2 className="size-4 animate-spin" />
+                    <span className="absolute inset-0 flex items-center justify-center bg-background/70">
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                       <span className="sr-only">{t.controls.compressing}</span>
                     </span>
                   )}
-                  {hasError && (
-                    <span className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-red-600 text-white">
-                      <AlertTriangle className="size-3" />
-                    </span>
-                  )}
-                  {file.compressedBlob && !file.compressing && !hasError && (
-                    <span className="absolute bottom-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-emerald-600 text-white">
-                      <Check className="size-3" />
-                    </span>
-                  )}
                 </span>
-                {hasError && (
-                  <span className="mt-2 block line-clamp-2 text-[10px] leading-tight text-red-600 dark:text-red-400">
-                    {file.error}
-                  </span>
-                )}
-                <span className="mt-2 block truncate text-xs font-medium">
-                  {file.file.name}
-                </span>
-                <span className="mt-1 flex gap-1.5 font-mono text-[10px] text-muted-foreground">
-                  {formatSize(file.file.size)}
-                  {ratio !== null && !hasError && (
+
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline gap-2">
+                    <span className="min-w-0 flex-1 truncate text-xs font-medium">
+                      {file.file.name}
+                    </span>
                     <span
-                      className={
-                        ratio >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-amber-600 dark:text-amber-400"
-                      }
+                      data-numeric
+                      className="shrink-0 text-[11px] leading-4 text-muted-foreground"
                     >
-                      {ratio >= 0 ? `-${ratio}%` : `+${Math.abs(ratio)}%`}
+                      {formatSize(file.file.size)}
                     </span>
-                  )}
-                  {hasError && (
-                    <span className="text-red-600 dark:text-red-400">
+                  </span>
+
+                  {hasError ? (
+                    <span className="mt-1 block truncate text-[11px] text-destructive">
                       {t.controls.retry}
+                    </span>
+                  ) : (
+                    <span className="mt-1.5 flex items-center gap-2">
+                      <RangeGauge
+                        variant="row"
+                        original={file.file.size}
+                        compressed={file.compressedSize}
+                        target={file.targetBytes}
+                        targetMet={file.targetMet}
+                        domain={domain}
+                        className="min-w-0 flex-1"
+                      />
+                      {ratio !== null && (
+                        <span
+                          data-numeric
+                          className={`shrink-0 text-[11px] leading-4 ${
+                            ratio >= 0 ? "text-signal" : "text-destructive"
+                          }`}
+                        >
+                          {formatDelta(ratio)}
+                        </span>
+                      )}
+                      {!file.compressing && file.compressedBlob && (
+                        <span className="shrink-0" aria-hidden="true">
+                          {file.targetMet === false ? (
+                            <AlertTriangle className="size-3 text-destructive" />
+                          ) : (
+                            <Check className="size-3 text-signal" />
+                          )}
+                        </span>
+                      )}
                     </span>
                   )}
                 </span>
               </button>
+
               <button
                 type="button"
                 onClick={() => removeFile(file.id)}
-                className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-100 shadow-sm transition hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute top-1/2 right-2 flex size-5 -translate-y-1/2 items-center justify-center rounded-[3px] text-muted-foreground opacity-0 outline-none transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100 max-lg:opacity-60"
                 aria-label={`${t.controls.remove} ${file.file.name}`}
               >
-                <X className="size-3.5" />
+                <X className="size-3" aria-hidden="true" />
               </button>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </section>
   );
 }

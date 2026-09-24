@@ -30,7 +30,7 @@ export function LanguageSwitcher() {
       />
       <Menu.Portal>
         <Menu.Positioner side="bottom" align="end" sideOffset={8}>
-          <Menu.Popup className="z-50 min-w-[128px] rounded-lg bg-popover py-1 shadow-md ring-1 ring-foreground/10 outline-none">
+          <Menu.Popup className="z-50 min-w-[128px] rounded-md border border-border bg-popover py-1 shadow-lg outline-none">
             {langOptions.map((opt) => (
               <Menu.Item
                 key={opt.value}
@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
               >
                 <span>{opt.label}</span>
                 {lang === opt.value && (
-                  <span className="size-1.5 rounded-full bg-foreground" />
+                  <span className="size-1.5 rounded-full bg-primary" />
                 )}
               </Menu.Item>
             ))}

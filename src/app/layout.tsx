@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
+import { Archivo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import { I18nProvider } from "@/i18n";
+
+/**
+ * 一款可变字承担全部字数：宽度轴用来区分「丝印标签」与「仪器读数」，
+ * 重量轴用来区分层级。CJK 落到系统字体（见 globals.css 的 --font-sans）。
+ */
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  display: "swap",
+  variable: "--font-archivo",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://image-compressor.314925.xyz"),
@@ -11,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | Image Compressor",
   },
   description:
-    "免费在线图片压缩工具，纯浏览器端处理，无需上传。支持 WebP/AVIF/PNG/JPEG 格式转换，批量拖拽压缩，1080p/2K/4K 尺寸调整，保留透明通道。保护隐私，图片不离开你的设备。",
+    "免费在线图片压缩与格式转换工具，支持 iPhone HEIC/HEIF、WebP、PNG、JPEG，纯浏览器端批量处理，图片无需上传。",
   keywords: [
     "图片压缩",
     "免费图片压缩",
@@ -21,9 +33,11 @@ export const metadata: Metadata = {
     "free image compressor",
     "画像圧縮",
     "WebP",
-    "AVIF",
     "PNG",
     "JPEG",
+    "HEIC",
+    "HEIF",
+    "iPhone 照片转换",
     "批量压缩",
     "batch compression",
     "隐私安全",
@@ -41,7 +55,7 @@ export const metadata: Metadata = {
     alternateLocale: ["en_US", "ja_JP"],
     title: "图片压缩 — 浏览器端批量压缩，零上传",
     description:
-      "纯浏览器端批量图片压缩。WebP/JPEG，1080p/2K/4K，拖拽即用，零上传。",
+      "支持 iPhone HEIC/HEIF 的浏览器端批量图片压缩与格式转换，拖拽即用，零上传。",
     siteName: "Image Compressor",
     images: [
       {
@@ -56,7 +70,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "图片压缩 — 浏览器端批量压缩",
     description:
-      "纯浏览器端批量图片压缩。WebP/JPEG，拖拽即用，零上传，保护隐私。",
+      "支持 iPhone HEIC/HEIF 的浏览器端批量图片压缩与格式转换，零上传，保护隐私。",
     images: ["/og-image.png"],
   },
   robots: {
@@ -81,7 +95,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh" suppressHydrationWarning>
+    <html lang="zh" className={archivo.variable} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -92,24 +106,11 @@ export default function RootLayout({
               name: "Image Compressor",
               alternateName: ["图片压缩工具", "画像圧縮ツール"],
               description:
-                "纯浏览器端图片压缩工具，支持批量拖拽、WebP/JPEG 转换。Client-side image compression tool. ブラウザ内で画像圧縮。",
+                "纯浏览器端图片压缩与格式转换工具，支持 iPhone HEIC/HEIF、WebP、PNG、JPEG。",
               url: "https://image-compressor.314925.xyz",
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
-              offers: [
-                {
-                  "@type": "Offer",
-                  name: "Free",
-                  price: "0",
-                  priceCurrency: "USD",
-                },
-                {
-                  "@type": "Offer",
-                  name: "Pro",
-                  price: "6",
-                  priceCurrency: "USD",
-                },
-              ],
+              isAccessibleForFree: true,
             }),
           }}
         />
@@ -134,15 +135,7 @@ export default function RootLayout({
                   name: "支持哪些图片格式？",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "输入支持所有浏览器能打开的图片格式。输出可选择 WebP、AVIF、PNG 或 JPEG。",
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: "WebP 和 AVIF 有什么区别？",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "AVIF 压缩率更高，同质量下体积比 WebP 小 20-30%，但编码速度较慢。WebP 兼容性更好，编码更快。",
+                    text: "输入支持 iPhone HEIC/HEIF 和浏览器能够解码的静态图片格式。输出可选择 WebP、PNG 或 JPEG。",
                   },
                 },
                 {
@@ -150,7 +143,7 @@ export default function RootLayout({
                   name: "PNG 会保留透明背景吗？",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "会。PNG 格式完整保留 alpha 透明通道。WebP 和 AVIF 也支持透明。",
+                    text: "会。PNG 格式完整保留 alpha 透明通道，WebP 也支持透明。",
                   },
                 },
                 {
@@ -158,7 +151,7 @@ export default function RootLayout({
                   name: "压缩会损失画质吗？",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "可调节质量滑块控制。WebP/JPEG/AVIF 是有损压缩（但高画质下肉眼难以分辨），PNG 是无损压缩。",
+                    text: "可调节质量滑块控制。WebP/JPEG 是有损压缩，PNG 输出不使用质量滑块。",
                   },
                 },
               ],

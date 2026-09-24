@@ -16,7 +16,9 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="size-8 rounded-lg ring-1 ring-foreground/10 bg-card" />;
+    return (
+      <div className="size-8 rounded-md border border-border bg-card" />
+    );
   }
 
   const cycle = () => {
@@ -47,6 +49,7 @@ export function ThemeToggle() {
       size="icon"
       onClick={cycle}
       title={label}
+      aria-label={label}
     >
       {icon}
     </Button>
