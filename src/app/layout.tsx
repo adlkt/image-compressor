@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
-import { Archivo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import { I18nProvider } from "@/i18n";
+import { BASE_PATH } from "@/lib/base-path";
 
 /**
- * 一款可变字承担全部字数：宽度轴用来区分「丝印标签」与「仪器读数」，
- * 重量轴用来区分层级。CJK 落到系统字体（见 globals.css 的 --font-sans）。
+ * 站点挂在 apex 下的路径上（314925.xyz/image-compressor）。
+ *
+ * 坑：Next **不会**给 metadata 里的资源自动补 basePath —— 实测 og:image、icon、
+ * alternates 都原样输出 /og-image.png、/icon.svg，落到线上就是 404。所以下面
+ * 一律写含路径的绝对 URL，这样也不会被未来版本的自动补前缀逻辑二次拼接。
  */
-const archivo = Archivo({
-  subsets: ["latin"],
-  axes: ["wdth"],
-  display: "swap",
-  variable: "--font-archivo",
-});
+const SITE_ORIGIN = "https://314925.xyz";
+const SITE_URL = `${SITE_ORIGIN}${BASE_PATH}`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://image-compressor.314925.xyz"),
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "图片压缩 — 浏览器端批量压缩，零上传 | Image Compressor",
+    default: "图片压缩 — 浏览器端批量压缩",
     template: "%s | Image Compressor",
   },
   description:
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
     "image compressor",
     "compress images online",
     "free image compressor",
-    "画像圧縮",
     "WebP",
     "PNG",
     "JPEG",
@@ -52,17 +50,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    alternateLocale: ["en_US", "ja_JP"],
+    alternateLocale: ["en_US"],
     title: "图片压缩 — 浏览器端批量压缩，零上传",
     description:
       "支持 iPhone HEIC/HEIF 的浏览器端批量图片压缩与格式转换，拖拽即用，零上传。",
     siteName: "Image Compressor",
     images: [
       {
-        url: "/og-image.png",
+        url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "Image Compressor",
+        alt: "图片压缩：压缩图片不用上传。真实压缩结果从 3.48 MB 降至 168 KB。",
       },
     ],
   },
@@ -71,7 +69,7 @@ export const metadata: Metadata = {
     title: "图片压缩 — 浏览器端批量压缩",
     description:
       "支持 iPhone HEIC/HEIF 的浏览器端批量图片压缩与格式转换，零上传，保护隐私。",
-    images: ["/og-image.png"],
+    images: [`${SITE_URL}/og-image.png`],
   },
   robots: {
     index: true,
@@ -79,13 +77,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     languages: {
-      zh: "/",
-      en: "/",
-      ja: "/",
+      zh: SITE_URL,
+      en: SITE_URL,
     },
-  },
-  icons: {
-    icon: "/icon.svg",
   },
 };
 
@@ -95,7 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh" className={archivo.variable} suppressHydrationWarning>
+    <html lang="zh" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -104,10 +98,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "Image Compressor",
-              alternateName: ["图片压缩工具", "画像圧縮ツール"],
+              alternateName: ["图片压缩工具"],
               description:
                 "纯浏览器端图片压缩与格式转换工具，支持 iPhone HEIC/HEIF、WebP、PNG、JPEG。",
-              url: "https://image-compressor.314925.xyz",
+              url: SITE_URL,
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
               isAccessibleForFree: true,
@@ -135,7 +129,7 @@ export default function RootLayout({
                   name: "支持哪些图片格式？",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "输入支持 iPhone HEIC/HEIF 和浏览器能够解码的静态图片格式。输出可选择 WebP、PNG 或 JPEG。",
+                    text: "输入支持 iPhone HEIC/HEIF，以及 JPEG、PNG、WebP 等常见格式。输出可选 WebP、PNG 或 JPEG。",
                   },
                 },
                 {

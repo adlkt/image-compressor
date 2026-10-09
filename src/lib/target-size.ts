@@ -4,6 +4,19 @@ export type TargetEncoding = {
   targetMet: boolean;
 };
 
+/**
+ * 压缩开始之前，原图就已经满足目标了吗。
+ *
+ * 「达标」在那种情况下是原图的事实，不是这次压缩的成果——界面据此把
+ * 状态降级成陈述句（不配绿勾），否则一次什么都没证明的压缩会被读成成果。
+ */
+export function sourceAlreadyMetTarget(
+  sourceBytes: number,
+  targetBytes: number | null,
+) {
+  return targetBytes !== null && sourceBytes <= targetBytes;
+}
+
 type FindTargetEncodingOptions = {
   maxQuality: number;
   targetBytes: number | null;

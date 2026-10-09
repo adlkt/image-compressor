@@ -20,10 +20,10 @@ test("keeps a wide dynamic range readable: 380 KB and 12.4 MB share one scale", 
   const small = scalePosition(380 * KB, domain);
   const large = scalePosition(12.4 * MB, domain);
 
-  // 小的那个不能贴在尺子左端，两者之间要有可读的间隔
+  // 小的那个不能贴在左端，两者之间要有可读的间隔
   assert.ok(small > 0.15, `380 KB 落在 ${small}，太靠左`);
   assert.ok(large < 0.98, `12.4 MB 落在 ${large}，太靠右`);
-  assert.ok(large - small > 0.4, "两端读数挤在一起了");
+  assert.ok(large - small > 0.4, "两端数值挤在一起了");
 });
 
 test("never leaves a reading pinned to either end of the scale", () => {
@@ -44,7 +44,7 @@ test("positions increase monotonically", () => {
     scalePosition(bytes, domain),
   );
   for (let i = 1; i < positions.length; i++) {
-    assert.ok(positions[i] > positions[i - 1], `第 ${i} 个读数没有递增`);
+    assert.ok(positions[i] > positions[i - 1], `第 ${i} 个数值没有递增`);
   }
 });
 
@@ -82,7 +82,7 @@ test("one batch shares one scale, so a common target lands at one position", () 
   const small = { original: 238 * KB, compressed: 7 * KB, target: 500 * KB };
 
   // 事件前的行为：每行各自配域，同一根目标线落在两个位置
-  // （实测 59.6% 与 87.1%）——「对齐的一列尺子」于是否定了自己。
+  // （实测 59.6% 与 87.1%）——「对齐的一列刻度」于是否定了自己。
   const perRow = [large, small].map((row) =>
     scalePosition(500 * KB, scaleDomain([row.original, row.compressed, row.target])),
   );
@@ -91,14 +91,14 @@ test("one batch shares one scale, so a common target lands at one position", () 
     `各自配域时两行本该错开到 0.2 以上，实测差 ${Math.abs(perRow[0] - perRow[1])}`,
   );
 
-  // 共用一把尺之后，同一根目标线全批只有一个位置
+  // 共用同一个域之后，同一根目标线全批只有一个位置
   const domain = batchDomain([large, small]);
   const shared = scalePosition(500 * KB, domain);
   assert.ok(
     Math.abs(shared - perRow[0]) > 0.01 || Math.abs(shared - perRow[1]) > 0.01,
-    "共用域与两行各自的域读出的位置一样，换尺没有生效",
+    "共用域与两行各自的域读出的位置一样，换域没有生效",
   );
-  assert.ok(shared > 0.05 && shared < 0.95, `目标线落到了尺子外面：${shared}`);
+  assert.ok(shared > 0.05 && shared < 0.95, `目标线落到了域外面：${shared}`);
 });
 
 test("batch domain contains every reading in the batch", () => {
@@ -109,11 +109,47 @@ test("batch domain contains every reading in the batch", () => {
 
   for (const bytes of [27 * KB, 238 * KB, 500 * KB, 800 * KB, 4.1 * MB]) {
     const position = scalePosition(bytes, domain);
-    assert.ok(position > 0 && position < 1, `${bytes} 贴到了尺子边缘`);
+    assert.ok(position > 0 && position < 1, `${bytes} 贴到了域边缘`);
   }
 });
 
 test("batch domain of nothing still yields a usable scale", () => {
   const domain = batchDomain([{ original: null, compressed: null, target: null }]);
   assert.ok(domain.hi > domain.lo);
+});
+
+test("size bar: one batch is one axis, so a bigger original always draws longer", () => {
+  const rows = [
+    { original: 4.1 * MB, compressed: 380 * KB, target: 500 * KB },
+    { original: 238 * KB, compressed: 27 * KB, target: 500 * KB },
+  ];
+  const domain = batchDomain(rows);
+
+  // 同一个字节数在批内只有一种长度，不随它落在哪一行而变
+  assert.equal(scalePosition(4.1 * MB, domain), scalePosition(rows[0].original, domain));
+  assert.equal(scalePosition(238 * KB, domain), scalePosition(rows[1].original, domain));
+
+  // 更大的原图必须画得更长——「看起来余量更大」不能是尺子被拉长的结果
+  assert.ok(
+    scalePosition(rows[0].original, domain) > scalePosition(rows[1].original, domain),
+    "原图更大的那一行反而画得更短，共用域没有生效",
+  );
+  assert.ok(scalePosition(380 * KB, domain) > scalePosition(27 * KB, domain));
+});
+
+test("size bar: the result never draws past the original", () => {
+  const domain = batchDomain([
+    { original: 4.1 * MB, compressed: 27 * KB, target: 500 * KB },
+    { original: 238 * KB, compressed: 61 * KB, target: 500 * KB },
+  ]);
+
+  for (const { original, compressed } of [
+    { original: 4.1 * MB, compressed: 27 * KB },
+    { original: 238 * KB, compressed: 61 * KB },
+  ]) {
+    assert.ok(
+      scalePosition(compressed, domain) < scalePosition(original, domain),
+      "结果条超出了原图条，变小了这件事在图上不成立",
+    );
+  }
 });

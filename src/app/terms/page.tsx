@@ -9,19 +9,32 @@ export default function TermsPage() {
   const { termsPage } = t;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navbar />
-      <main className="flex-1 max-w-2xl mx-auto px-6 py-16 w-full">
-        <h1 className="text-2xl font-bold mb-2">{termsPage.title}</h1>
-        <p className="text-sm text-muted-foreground mb-10">{termsPage.intro}</p>
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      <Navbar contained />
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+          <h1 className="max-w-[34rem] text-display leading-[1.15] font-semibold tracking-[-0.02em] sm:text-hero">
+            {termsPage.title}
+          </h1>
+          <p className="mt-6 max-w-[34rem] text-sm text-muted-foreground">
+            {termsPage.intro}
+          </p>
 
-        <div className="space-y-8">
-          {termsPage.sections.map((s, i) => (
-            <section key={i}>
-              <h2 className="text-base font-semibold mb-2">{s.title}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{s.content}</p>
-            </section>
-          ))}
+          <div className="mt-16 border-t border-border">
+            {termsPage.sections.map((section) => (
+              <section
+                key={section.title}
+                className="border-b border-border py-10 lg:grid lg:grid-cols-[0.6fr_1.4fr] lg:gap-10"
+              >
+                <h2 className="text-sm leading-[1.4] font-semibold">
+                  {section.title}
+                </h2>
+                <p className="mt-3 max-w-[34rem] text-sm text-muted-foreground lg:mt-0">
+                  {section.content}
+                </p>
+              </section>
+            ))}
+          </div>
         </div>
       </main>
       <Footer />

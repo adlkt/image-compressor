@@ -7,7 +7,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       disableTransitionOnChange
       enableSystem
       storageKey="image-compressor-theme"

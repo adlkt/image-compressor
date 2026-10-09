@@ -2,16 +2,17 @@
 
 import { useI18n } from "@/i18n";
 import { DELIVERY_RECIPES, useCompressor, type RecipeId } from "@/lib/store";
+import { formatTargetSize } from "@/lib/format";
+import { Check } from "lucide-react";
 
 type Recipe = Exclude<RecipeId, "custom">;
 type Orientation = "row" | "column";
 
 /**
- * 档位选择器。
+ * 预设选择器。
  *
- * 它不是四张卡片，而是同一台仪器上的四个档位：选中态是一条信号色边线，
- * 不是一块填充底色——填色会把「当前档位」和「可点区域」搅在一起。
- * 档位的详细参数按规格牌摊开成若干格，比连成一句话更好扫。
+ * 选中态使用浅蓝色面与勾选标记，不靠边框或颜色单独表达。
+ * 每个预设的参数摊成若干格，比连成一句话更好扫。
  */
 export function PresetSelector({
   orientation = "row",
@@ -24,46 +25,50 @@ export function PresetSelector({
   const activeRecipeId = useCompressor((state) => state.activeRecipeId);
   const applyRecipe = useCompressor((state) => state.applyRecipe);
 
-  const specs: Array<{ id: Recipe; title: string; detail: string; target: string }> = [
-    {
-      id: "web",
-      title: t.presets.presetWeb,
-      detail: t.presets.presetWebDesc,
-      target: `${Math.round((DELIVERY_RECIPES.web.targetBytes ?? 0) / 1024)} KB`,
-    },
-    {
-      id: "social",
-      title: t.presets.presetSocial,
-      detail: t.presets.presetSocialDesc,
-      target: `${Math.round((DELIVERY_RECIPES.social.targetBytes ?? 0) / 1024)} KB`,
-    },
-    {
-      id: "ecommerce",
-      title: t.presets.presetEcommerce,
-      detail: t.presets.presetEcommerceDesc,
-      target: `${Math.round((DELIVERY_RECIPES.ecommerce.targetBytes ?? 0) / 1024)} KB`,
-    },
-    {
-      id: "quality",
-      title: t.presets.presetMax,
-      detail: t.presets.presetMaxDesc,
-      target: t.controls.noLimit,
-    },
+  const presets: Array<{ id: Recipe; title: string }> = [
+    { id: "web", title: t.presets.presetWeb },
+    { id: "social", title: t.presets.presetSocial },
+    { id: "ecommerce", title: t.presets.presetEcommerce },
+    { id: "quality", title: t.presets.presetMax },
   ];
+
+  const specs: Array<{
+    id: Recipe;
+    title: string;
+    description: string;
+    cells: string[];
+  }> = presets.map(
+    (preset) => {
+      const recipe = DELIVERY_RECIPES[preset.id];
+      return {
+        ...preset,
+        description: t.presets.descriptions[preset.id],
+        // 参数来自真实配置，不由一句话拆开——拆字符串会把文案和参数绑死
+        cells: [
+          recipe.format,
+          `${recipe.quality}%`,
+          recipe.maxWidth === 0 ? t.controls.originalSize : `${recipe.maxWidth}px`,
+          recipe.targetBytes === null
+            ? t.controls.noTarget
+            : formatTargetSize(recipe.targetBytes),
+        ],
+      };
+    },
+  );
 
   const column = orientation === "column";
 
   return (
     <fieldset className={className}>
-      <legend data-silk className="panel-label mb-2">
+      <legend className="mb-2 text-sm leading-[1.4] font-semibold">
         {t.controls.presets}
       </legend>
 
       <div
         className={
           column
-            ? "flex flex-col divide-y divide-border border-y border-border"
-            : "grid grid-cols-2 border-t border-border sm:grid-cols-4"
+            ? "flex flex-col gap-1"
+            : "grid grid-cols-2 gap-1 sm:grid-cols-4"
         }
       >
         {specs.map((spec) => {
@@ -74,41 +79,50 @@ export function PresetSelector({
               type="button"
               aria-pressed={active}
               onClick={() => applyRecipe(spec.id)}
-              className={`group relative text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/40 ${
-                column ? "py-2.5 pr-2" : "border-b border-border px-0 py-2.5 sm:border-b-0"
-              } ${active ? "" : "hover:bg-accent/60"}`}
+              className={`group relative min-h-11 rounded-[10px] px-3 py-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                active
+                  ? "bg-primary/[0.09] hover:bg-primary/[0.12]"
+                  : "hover:bg-accent/60 active:bg-accent"
+              }`}
             >
-              {/* 选中态：一条边线。列向在左边线，行向在顶边线。 */}
-              <span
-                aria-hidden="true"
-                className={`absolute bg-primary transition-opacity ${
-                  column ? "top-0 bottom-0 left-0 w-[2px]" : "top-0 right-3 left-0 h-[2px]"
-                } ${active ? "opacity-100" : "opacity-0"}`}
-              />
-
-              <span className={column ? "block pl-2.5" : "block pr-3"}>
+              <span className="block">
                 <span
-                  className={`block text-xs font-medium ${
-                    active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                  className={`flex items-center justify-between gap-2 text-xs font-medium ${
+                    active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                   }`}
                 >
-                  {spec.title}
+                  <span>{spec.title}</span>
+                  {active ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                    >
+                      <Check className="size-3.5" strokeWidth={2.5} />
+                    </span>
+                  ) : spec.id === "web" ? (
+                    <span className="font-normal text-primary">{t.presets.recommended}</span>
+                  ) : null}
                 </span>
 
-                {/* 规格牌：每个参数占一格，比连成一句话好扫 */}
-                <span className="mt-1 flex flex-wrap items-center">
-                  {[...spec.detail.split(" · "), spec.target].map((segment, index) => (
-                    <span
-                      key={segment}
-                      data-numeric
-                      className={`text-[10px] leading-4 text-muted-foreground ${
-                        index === 0 ? "" : "ml-1.5 border-l border-border pl-1.5"
-                      }`}
-                    >
-                      {segment}
-                    </span>
-                  ))}
-                </span>
+                {active ? (
+                  <span className="mt-1 flex flex-wrap items-center">
+                    {spec.cells.map((cell, index) => (
+                      <span
+                        key={cell}
+                        data-numeric
+                        className={`text-xs leading-[1.5] text-foreground/65 ${
+                          index === 0 ? "" : "ml-2 border-l border-primary/20 pl-2"
+                        }`}
+                      >
+                        {cell}
+                      </span>
+                    ))}
+                  </span>
+                ) : (
+                  <span className="mt-1 block text-xs leading-[1.5] text-muted-foreground">
+                    {spec.description}
+                  </span>
+                )}
               </span>
             </button>
           );

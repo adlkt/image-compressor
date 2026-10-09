@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://image-compressor.314925.xyz/sitemap.xml
+Sitemap: https://314925.xyz/image-compressor/sitemap.xml

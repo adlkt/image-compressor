@@ -1,18 +1,17 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n, type Lang } from "@/i18n";
 
 const langOptions: { value: Lang; label: string }[] = [
   { value: "zh", label: "中文" },
   { value: "en", label: "English" },
-  { value: "ja", label: "日本語" },
 ];
 
 export function LanguageSwitcher() {
   const { lang, setLang, isPending, t } = useI18n();
+  const current = lang === "zh" ? "中文" : "EN";
 
   return (
     <Menu.Root modal={false}>
@@ -20,24 +19,27 @@ export function LanguageSwitcher() {
         render={
           <Button
             variant="ghost"
-            size="icon"
+            size="lg"
             title={t.lang}
-            aria-label={t.lang}
+            aria-label={`${t.lang}：${lang === "zh" ? "中文" : "English"}`}
+            className="h-11 min-w-11 px-2.5"
           >
-            <Languages className="w-4 h-4" />
+            <span className="text-xs leading-none font-medium">
+              {current}
+            </span>
           </Button>
         }
       />
       <Menu.Portal>
         <Menu.Positioner side="bottom" align="end" sideOffset={8}>
-          <Menu.Popup className="z-50 min-w-[128px] rounded-md border border-border bg-popover py-1 shadow-lg outline-none">
+          <Menu.Popup className="z-50 min-w-[7.5rem] rounded-md border border-border bg-popover py-1 shadow-overlay outline-none">
             {langOptions.map((opt) => (
               <Menu.Item
                 key={opt.value}
                 disabled={isPending}
                 onClick={() => setLang(opt.value)}
                 aria-current={lang === opt.value ? "true" : undefined}
-                className={`flex cursor-default items-center justify-between px-3 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-foreground data-[disabled]:opacity-60 ${lang === opt.value ? "text-foreground" : "text-muted-foreground"}`}
+                className={`flex cursor-default items-center justify-between px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-foreground data-[disabled]:opacity-60 ${lang === opt.value ? "text-foreground" : "text-muted-foreground"}`}
               >
                 <span>{opt.label}</span>
                 {lang === opt.value && (

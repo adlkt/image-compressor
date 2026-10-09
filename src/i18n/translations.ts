@@ -4,19 +4,44 @@ export type { Lang } from "./locales";
 
 export type Translations = {
   title: string;
-  description: string;
-  /** 铭牌上的一句话：这台机器是干什么的 */
-  tagline: string;
-  /** 关于这一段：说清它做什么、不做什么 */
-  about: string;
-  features: {
-    privacy: { title: string; desc: string };
-    format: { title: string; desc: string };
-    realtime: { title: string; desc: string };
+  /** 首屏：一句可验证的主张 */
+  hero: {
+    claim: string;
+    /** 示例图片入口的可见标签 */
+    samples: string;
+    /** 示例图的替换文本，顺序与组件里 SAMPLES 一致 */
+    sampleLabels: string[];
+    /** 点明示例图本身就是本工具的输出 */
+    samplesNote: string;
+    sampleError: string;
+  };
+  /** 首屏下方：一次真实压缩的读数与测量条件 */
+  measure: {
+    title: string;
+    sample: string;
+    original: string;
+    output: string;
+    elapsed: string;
+    /** 环境与参数各摊成一组规格格，不拼成一句元信息串 */
+    environment: string;
+    browser: string;
+    os: string;
+    params: string;
+    preset: string;
+    format: string;
+    quality: string;
+    maxEdge: string;
+    target: string;
+    date: string;
+  };
+  /** 怎么用：无序列表，不是步骤条 */
+  howto: {
+    title: string;
+    items: string[];
   };
   dropzone: {
-    title: string;
-    paste: string;
+    /** 拖入/选择了不被支持的文件时的行内提示；{n} 是被忽略的文件数 */
+    rejected: string;
   };
   controls: {
     presets: string;
@@ -28,6 +53,8 @@ export type Translations = {
     noLimit: string;
     remove: string;
     clearAll: string;
+    clearAllConfirm: string;
+    discardBatchConfirm: string;
     compressed: string;
     wait: string;
     compressing: string;
@@ -42,43 +69,46 @@ export type Translations = {
     targetSizePng: string;
     targetMet: string;
     targetMissed: string;
+    /** 原图本来就低于目标：达标是原图的事实，不是这次压缩的成果 */
+    targetAlreadyMet: string;
     batchNaming: string;
     namingTemplate: string;
     namingHint: string;
     filenameExample: string;
     exportPreparing: string;
     exportError: string;
+    /** 逐项细调的折叠标题 */
+    fineTune: string;
+    /** 预设规格格：最大宽度不受限 */
+    originalSize: string;
+    /** 预设规格格：不设目标大小 */
+    noTarget: string;
   };
   presets: {
     presetWeb: string;
-    presetWebDesc: string;
     presetSocial: string;
-    presetSocialDesc: string;
     presetEcommerce: string;
-    presetEcommerceDesc: string;
     presetMax: string;
-    presetMaxDesc: string;
+    recommended: string;
+    descriptions: Record<"web" | "social" | "ecommerce" | "quality", string>;
   };
   download: string;
   downloadAll: string;
   downloadZip: string;
   downloadIndividual: string;
   summary: {
-    totalSaved: string;
+    /** 批次体积变化：与队列行、预览表头同一套符号——减号＝变小 */
+    totalChange: string;
     totalFiles: string;
     totalOriginal: string;
     totalCompressed: string;
   };
-  theme: { light: string; dark: string; auto: string };
+  theme: { light: string; dark: string; auto: string; switchTo: string };
   lang: string;
-  footer: string;
+  /** 页脚的几句主张，逐句列出，不用中圆点连成一句 */
+  footerClaims: string[];
   footerPrivacy: string;
   footerTerms: string;
-  footerContact: string;
-  gauge: {
-    range: string;
-    idle: string;
-  };
   privacyPage: {
     title: string;
     intro: string;
@@ -89,10 +119,6 @@ export type Translations = {
     intro: string;
     sections: { title: string; content: string }[];
   };
-  howItWorks: {
-    title: string;
-    steps: { title: string; desc: string }[];
-  };
   faq: {
     title: string;
     items: { q: string; a: string }[];
@@ -102,27 +128,40 @@ export type Translations = {
 export const translations: Record<Lang, Translations> = {
   zh: {
     title: "图片压缩",
-    description: "HEIC / HEIF / JPEG / PNG / WebP",
-    tagline: "压缩、改尺寸、换格式，全程在浏览器里完成",
-    about:
-      "iPhone 的 HEIC 照片和 macOS 的大截图都能直接拖进来，压缩、改尺寸、换格式一次处理完。所有计算都在这台设备上完成——图片不会离开浏览器，也没有可以上传的地方。",
-    features: {
-      privacy: {
-        title: "隐私优先",
-        desc: "本地处理，不上传。",
-      },
-      format: {
-        title: "多格式支持",
-        desc: "支持 HEIC / HEIF 输入，输出 WebP / PNG / JPEG。",
-      },
-      realtime: {
-        title: "实时预览",
-        desc: "拖动质量滑块，所有图片即时重新压缩，效果立即可见。",
-      },
+    hero: {
+      claim: "图片不上传，压缩在你的浏览器里跑完。",
+      samples: "选择一张示例图",
+      sampleLabels: ["云层航拍照片", "沙漠航拍照片"],
+      samplesNote: "示例图由本工具压缩生成。",
+      sampleError: "示例图加载失败，请选择你自己的图片。",
+    },
+    measure: {
+      title: "真实测量",
+      sample: "示例照片",
+      original: "原图",
+      output: "输出",
+      elapsed: "耗时",
+      environment: "环境",
+      browser: "浏览器",
+      os: "操作系统",
+      params: "参数",
+      preset: "预设",
+      format: "格式",
+      quality: "质量",
+      maxEdge: "最长边",
+      target: "目标",
+      date: "测量日期",
+    },
+    howto: {
+      title: "怎么用",
+      items: [
+        "把图片拖进来、直接粘贴截图，或者点击选择图片。支持 HEIC / HEIF / JPEG / PNG / WebP。",
+        "需要时调整输出格式、质量与最大宽度；也可以设一个目标大小（比如 500 KB），工具会自动选好压缩参数。",
+        "处理完逐张下载，或者打包成一个 ZIP。",
+      ],
     },
     dropzone: {
-      title: "把图片拖进来",
-      paste: "拖进来，或者直接粘贴截图",
+      rejected: "有 {n} 个文件不是图片，已忽略。支持 HEIC / HEIF / JPEG / PNG / WebP。",
     },
     controls: {
       presets: "预设",
@@ -134,6 +173,8 @@ export const translations: Record<Lang, Translations> = {
       noLimit: "不限制",
       remove: "移除",
       clearAll: "清空全部",
+      clearAllConfirm: "要清空当前批次吗？尚未下载的结果会丢失。",
+      discardBatchConfirm: "要返回首页并丢弃当前批次吗？",
       compressed: "压缩后",
       wait: "选择图片查看预览",
       compressing: "压缩中",
@@ -145,46 +186,48 @@ export const translations: Record<Lang, Translations> = {
       retry: "点击重试",
       targetSize: "目标大小",
       targetSizeHint: "留空则只按质量压缩，范围 20–10240 KB",
-      targetSizePng: "PNG 不支持按目标大小寻优",
+      targetSizePng: "PNG 暂不支持按目标大小压缩",
       targetMet: "已达到大小目标",
       targetMissed: "已用最低质量，仍高于目标",
+      targetAlreadyMet: "原图已低于目标",
       batchNaming: "批量命名",
       namingTemplate: "文件名模板",
       namingHint: "可用：{name} 原名、{n} 序号、{width}、{height}",
       filenameExample: "实时示例",
       exportPreparing: "正在打包",
       exportError: "打包失败，请重试",
+      fineTune: "细调",
+      originalSize: "原始尺寸",
+      noTarget: "不设目标",
     },
     presets: {
       presetWeb: "Web 优化",
-      presetWebDesc: "WebP 80% · 1920px",
       presetSocial: "社交媒体",
-      presetSocialDesc: "JPEG 85% · 1200px",
       presetEcommerce: "电商商品图",
-      presetEcommerceDesc: "WebP 85% · 2048px",
       presetMax: "最佳质量",
-      presetMaxDesc: "WebP 95% · 原始尺寸",
+      recommended: "推荐",
+      descriptions: {
+        web: "网页与日常分享，兼顾清晰度和体积",
+        social: "适合常见社交平台的 JPEG",
+        ecommerce: "保留商品细节并控制上传体积",
+        quality: "优先画质，不限制尺寸与目标体积",
+      },
     },
     download: "下载",
     downloadAll: "下载全部",
     downloadZip: "下载 ZIP",
     downloadIndividual: "逐张下载",
     summary: {
-      totalSaved: "总计节省",
+      totalChange: "体积变化",
       totalFiles: "文件数",
       totalOriginal: "原始大小",
       totalCompressed: "压缩后大小",
     },
-    theme: { light: "浅色", dark: "深色", auto: "系统" },
+    theme: { light: "浅色", dark: "深色", auto: "系统", switchTo: "切换到" },
     lang: "语言",
-    footer: "纯本地处理 · 图片不会上传 · 免费使用",
+    footerClaims: ["纯本地处理", "图片不会上传", "免费使用"],
     footerPrivacy: "隐私政策",
     footerTerms: "服务条款",
-    footerContact: "联系我们",
-    gauge: {
-      range: "量程",
-      idle: "把图片放进下面的进料口，这里会显示量到的体积。",
-    },
     privacyPage: {
       title: "隐私政策",
       intro:
@@ -258,14 +301,6 @@ export const translations: Record<Lang, Translations> = {
         },
       ],
     },
-    howItWorks: {
-      title: "如何使用",
-      steps: [
-        { title: "添加图片", desc: "拖拽、粘贴截图或点击上传" },
-        { title: "调整设置", desc: "选择输出格式、质量和最大宽度" },
-        { title: "下载结果", desc: "单张下载或打包下载" },
-      ],
-    },
     faq: {
       title: "常见问题",
       items: [
@@ -275,11 +310,11 @@ export const translations: Record<Lang, Translations> = {
         },
         {
           q: "支持哪些图片格式？",
-          a: "输入支持 iPhone HEIC/HEIF 和浏览器能够解码的静态图片格式。输出可选择 WebP、PNG 或 JPEG。动画图片会按静态图片处理。",
+          a: "输入支持 iPhone HEIC/HEIF，以及 JPEG、PNG、WebP 等常见格式。输出可选 WebP、PNG 或 JPEG。动图会按静态图片处理。",
         },
         {
           q: "为什么暂不提供 AVIF 输出？",
-          a: "浏览器可以显示 AVIF，并不代表能够可靠地编码 AVIF。我们会在编码能力经过验证后再提供，避免生成格式错误的文件。",
+          a: "浏览器能显示 AVIF，不代表能可靠地生成 AVIF。等编码能力验证过我们再提供，免得下载到打不开的文件。",
         },
         {
           q: "PNG 会保留透明背景吗？",
@@ -294,27 +329,41 @@ export const translations: Record<Lang, Translations> = {
   },
   en: {
     title: "Image Compressor",
-    description: "HEIC / HEIF / JPEG / PNG / WebP",
-    tagline: "Compress, resize, and convert — all inside your browser",
-    about:
-      "Drop in iPhone HEIC photos and oversized macOS screenshots, then compress, resize, and convert them in one pass. Every calculation runs on this device: your images never leave the browser, and there is nowhere for them to be uploaded.",
-    features: {
-      privacy: {
-        title: "Privacy First",
-        desc: "Processed locally. Never uploaded.",
-      },
-      format: {
-        title: "Multi-Format",
-        desc: "HEIC / HEIF input with WebP / PNG / JPEG output.",
-      },
-      realtime: {
-        title: "Live Preview",
-        desc: "Adjust quality and see results instantly across all images.",
-      },
+    hero: {
+      claim: "Images are never uploaded. Compression runs in your browser.",
+      samples: "Choose a sample image",
+      sampleLabels: ["Aerial cloud photo", "Aerial desert photo"],
+      samplesNote: "These examples were compressed by this tool.",
+      sampleError: "The example could not be loaded. Choose one of your own images instead.",
+    },
+    measure: {
+      title: "A real measurement",
+      sample: "Example photo",
+      original: "Source",
+      output: "Output",
+      elapsed: "Elapsed",
+      environment: "Environment",
+      browser: "Browser",
+      os: "Operating system",
+      params: "Settings",
+      preset: "Preset",
+      format: "Format",
+      quality: "Quality",
+      maxEdge: "Max edge",
+      target: "Target",
+      date: "Measured on",
+    },
+    howto: {
+      title: "How to use it",
+      items: [
+        "Drop images in, paste a screenshot, or click to choose files. HEIC / HEIF / JPEG / PNG / WebP are supported.",
+        "Adjust output format, quality, and max width when you need to, or set a target size (say 500 KB) and let the tool pick the settings.",
+        "Download files one by one when you are done, or export them as a ZIP.",
+      ],
     },
     dropzone: {
-      title: "Drop images here",
-      paste: "Drop them in, or paste a screenshot",
+      rejected:
+        "Skipped {n} file(s) that aren't images. Supported: HEIC / HEIF / JPEG / PNG / WebP.",
     },
     controls: {
       presets: "Presets",
@@ -326,6 +375,8 @@ export const translations: Record<Lang, Translations> = {
       noLimit: "No limit",
       remove: "Remove",
       clearAll: "Clear all",
+      clearAllConfirm: "Clear this batch? Results you have not downloaded will be lost.",
+      discardBatchConfirm: "Return home and discard this batch?",
       compressed: "Compressed",
       wait: "Select an image to preview",
       compressing: "Compressing",
@@ -336,47 +387,49 @@ export const translations: Record<Lang, Translations> = {
       failedItems: "{count} failed",
       retry: "Click to retry",
       targetSize: "Target size",
-      targetSizeHint: "Leave blank to use quality only · 20–10240 KB",
-      targetSizePng: "Target-size optimization is unavailable for PNG",
+      targetSizeHint: "Leave blank to compress by quality only (20–10240 KB)",
+      targetSizePng: "PNG doesn't support a target size yet",
       targetMet: "Size target met",
       targetMissed: "Still above target at minimum quality",
+      targetAlreadyMet: "Source already under target",
       batchNaming: "Batch naming",
       namingTemplate: "Filename template",
       namingHint: "Tokens: {name}, {n}, {width}, {height}",
       filenameExample: "Live example",
       exportPreparing: "Preparing package",
       exportError: "Package creation failed. Try again.",
+      fineTune: "Fine-tune",
+      originalSize: "Original size",
+      noTarget: "No target",
     },
     presets: {
       presetWeb: "Web optimized",
-      presetWebDesc: "WebP 80% · 1920px",
       presetSocial: "Social media",
-      presetSocialDesc: "JPEG 85% · 1200px",
       presetEcommerce: "E-commerce",
-      presetEcommerceDesc: "WebP 85% · 2048px",
       presetMax: "Best quality",
-      presetMaxDesc: "WebP 95% · original size",
+      recommended: "Recommended",
+      descriptions: {
+        web: "Balanced clarity and size for websites and everyday sharing",
+        social: "JPEG sized for common social platforms",
+        ecommerce: "Keeps product detail while controlling upload size",
+        quality: "Prioritizes quality with no size or byte target",
+      },
     },
     download: "Download",
     downloadAll: "Download all",
     downloadZip: "Download ZIP",
     downloadIndividual: "Download individually",
     summary: {
-      totalSaved: "Total saved",
+      totalChange: "Size change",
       totalFiles: "Files",
       totalOriginal: "Original",
       totalCompressed: "Compressed",
     },
-    theme: { light: "Light", dark: "Dark", auto: "System" },
+    theme: { light: "Light", dark: "Dark", auto: "System", switchTo: "Switch to" },
     lang: "Language",
-    footer: "100% local processing · Images never upload · Free to use",
+    footerClaims: ["Runs in your browser", "Images are never uploaded", "Free to use"],
     footerPrivacy: "Privacy Policy",
     footerTerms: "Terms of Service",
-    footerContact: "Contact Us",
-    gauge: {
-      range: "Range",
-      idle: "Feed an image in below and this scale will show what it measures.",
-    },
     privacyPage: {
       title: "Privacy Policy",
       intro:
@@ -451,20 +504,6 @@ export const translations: Record<Lang, Translations> = {
         },
       ],
     },
-    howItWorks: {
-      title: "How It Works",
-      steps: [
-        {
-          title: "Add images",
-          desc: "Drag & drop, paste from clipboard, or click to upload",
-        },
-        {
-          title: "Adjust settings",
-          desc: "Choose format, quality, and max width",
-        },
-        { title: "Download", desc: "Save individually or as a batch" },
-      ],
-    },
     faq: {
       title: "Frequently Asked Questions",
       items: [
@@ -474,11 +513,11 @@ export const translations: Record<Lang, Translations> = {
         },
         {
           q: "Which formats are supported?",
-          a: "Input supports iPhone HEIC/HEIF and static image formats your browser can decode. Output choices are WebP, PNG, or JPEG. Animated images are processed as still images.",
+          a: "Input supports iPhone HEIC/HEIF plus common formats like JPEG, PNG, and WebP. Output can be WebP, PNG, or JPEG. Animated images are saved as still images.",
         },
         {
           q: "Why isn't AVIF output available yet?",
-          a: "A browser may display AVIF without being able to encode it reliably. We will only offer AVIF after the encoder is verified, so downloads always match their stated format.",
+          a: "Browsers can display AVIF long before they can encode it reliably. We'll add it once the encoder checks out, so downloads always open as real AVIF.",
         },
         {
           q: "Does PNG preserve transparency?",
@@ -487,202 +526,6 @@ export const translations: Record<Lang, Translations> = {
         {
           q: "Does compression reduce image quality?",
           a: "Adjust the quality slider to control WebP/JPEG quality and size. PNG output does not use the quality slider and is usually larger.",
-        },
-      ],
-    },
-  },
-  ja: {
-    title: "画像圧縮",
-    description: "HEIC / HEIF / JPEG / PNG / WebP",
-    tagline: "圧縮・リサイズ・形式変換を、ブラウザだけで",
-    about:
-      "iPhone の HEIC 写真も macOS の大きなスクリーンショットもそのまま追加でき、圧縮・リサイズ・形式変換を一度に処理します。計算はすべてこのデバイス上で行われ、画像がブラウザの外に出ることはありません。",
-    features: {
-      privacy: {
-        title: "プライバシー第一",
-        desc: "端末内で処理。アップロードなし。",
-      },
-      format: {
-        title: "マルチフォーマット",
-        desc: "HEIC / HEIF 入力、WebP / PNG / JPEG 出力に対応。",
-      },
-      realtime: {
-        title: "リアルタイムプレビュー",
-        desc: "品質スライダーの調整で、すべての画像が即座に再圧縮されます。",
-      },
-    },
-    dropzone: {
-      title: "画像をここにドロップ",
-      paste: "ドロップ、またはスクリーンショットを貼り付け",
-    },
-    controls: {
-      presets: "プリセット",
-      custom: "カスタム",
-      format: "フォーマット",
-      quality: "品質",
-      maxWidth: "最大幅",
-      original: "元サイズ",
-      noLimit: "制限なし",
-      remove: "削除",
-      clearAll: "すべて削除",
-      compressed: "圧縮後",
-      wait: "画像を選択してプレビュー",
-      compressing: "圧縮中",
-      files: "ファイル",
-      add: "画像を選択",
-      processing: "処理中",
-      allDone: "完了",
-      failedItems: "{count} 件失敗",
-      retry: "クリックで再試行",
-      targetSize: "目標サイズ",
-      targetSizeHint: "空欄は品質のみ · 20〜10240 KB",
-      targetSizePng: "PNG は目標サイズ最適化に対応していません",
-      targetMet: "サイズ目標を達成",
-      targetMissed: "最低品質でも目標を超えています",
-      batchNaming: "一括命名",
-      namingTemplate: "ファイル名テンプレート",
-      namingHint: "使用可能：{name}、{n}、{width}、{height}",
-      filenameExample: "プレビュー",
-      exportPreparing: "パッケージ作成中",
-      exportError: "パッケージ作成に失敗しました",
-    },
-    presets: {
-      presetWeb: "ウェブ最適化",
-      presetWebDesc: "WebP 80% · 1920px",
-      presetSocial: "SNS用",
-      presetSocialDesc: "JPEG 85% · 1200px",
-      presetEcommerce: "EC商品画像",
-      presetEcommerceDesc: "WebP 85% · 2048px",
-      presetMax: "最高品質",
-      presetMaxDesc: "WebP 95% · 元サイズ",
-    },
-    download: "ダウンロード",
-    downloadAll: "すべてダウンロード",
-    downloadZip: "ZIPでダウンロード",
-    downloadIndividual: "個別にダウンロード",
-    summary: {
-      totalSaved: "合計削減",
-      totalFiles: "ファイル数",
-      totalOriginal: "元サイズ",
-      totalCompressed: "圧縮後",
-    },
-    theme: { light: "ライト", dark: "ダーク", auto: "システム" },
-    lang: "言語",
-    footer: "完全ローカル処理 · 画像はアップロードされません · 無料で利用可能",
-    footerPrivacy: "プライバシーポリシー",
-    footerTerms: "利用規約",
-    footerContact: "お問い合わせ",
-    gauge: {
-      range: "レンジ",
-      idle: "下の投入口に画像を入れると、ここに計測結果が表示されます。",
-    },
-    privacyPage: {
-      title: "プライバシーポリシー",
-      intro:
-        "最終更新日: 2026年6月20日。このプライバシーポリシーは、Image Compressor がデータをどのように取り扱うかを説明します。",
-      sections: [
-        {
-          title: "データ収集は一切行いません",
-          content:
-            "すべての画像圧縮処理は完全にブラウザ内で行われます。画像がサーバーにアップロードされることは一切ありません。お客様の画像を保存、表示、送信することはありません。",
-        },
-        {
-          title: "ローカルストレージ",
-          content:
-            "ブラウザストレージには言語、テーマ、圧縮の初期設定を保存します。設定の復元にのみ使われ、画像内容は含まず、販売や広告追跡には使用しません。",
-        },
-        {
-          title: "広告とサードパーティ",
-          content:
-            "現在のバージョンでは広告を表示せず、第三者の広告トラッカーも使用しません。将来変更する場合は、事前に本ポリシーを更新し、明確に説明します。",
-        },
-        {
-          title: "分析ツール",
-          content:
-            "サイトの利用状況を把握するために、プライバシーに配慮した分析ツール（Plausible や Umami など）を使用する場合があります。これらのツールは個人ユーザーを追跡せず、Cookie を設定せず、すべてのデータは匿名化されます。",
-        },
-        {
-          title: "お問い合わせ",
-          content:
-            "プライバシーポリシーや本サービスについてご質問がある場合は、メール（a17637040895@gmail.com）または GitHub Issues（https://github.com/adlkt/image-compressor/issues）からお問い合わせください。",
-        },
-      ],
-    },
-    termsPage: {
-      title: "利用規約",
-      intro:
-        "最終更新日: 2026年9月8日。本サイトをご利用いただくことで、以下の規約に同意したものとみなされます。",
-      sections: [
-        {
-          title: "サービスについて",
-          content:
-            "Image Compressor はブラウザ内で動作する画像圧縮・形式変換ツールです。処理容量は端末のメモリとブラウザの制限に依存します。",
-        },
-        {
-          title: "利用方法",
-          content:
-            "このツールは現在無料で利用でき、有料プラン、サブスクリプション、ライセンスは提供していません。使用権限のある画像のみ処理してください。",
-        },
-        {
-          title: "サポート",
-          content:
-            "機能上の問題や利用規約についてご質問がある場合は、下記の連絡先までお問い合わせください。",
-        },
-        {
-          title: "知的財産権",
-          content:
-            "Image Compressor の名称・インターフェース・コードは知的財産法により保護されています。本ツールで処理された画像の権利はすべてユーザーに帰属し、当方が主張することはありません。",
-        },
-        {
-          title: "免責事項",
-          content:
-            "本サービスは「現状有姿」で提供されます。すべての圧縮処理はブラウザ内で完結し、画像がアップロードされることはありませんが、本ツールの利用によって生じたデータの損失について当方は責任を負いません。重要なファイルを一括処理する前に、必ずバックアップをお取りください。",
-        },
-        {
-          title: "規約の変更",
-          content:
-            "本規約は随時更新される場合があります。変更後は本ページに掲載し、日付を更新します。変更後も本サービスを継続利用された場合、更新後の規約に同意したものとみなされます。",
-        },
-        {
-          title: "お問い合わせ",
-          content:
-            "ご不明な点があれば、メール（a17637040895@gmail.com）または GitHub Issues（https://github.com/adlkt/image-compressor/issues）までご連絡ください。",
-        },
-      ],
-    },
-    howItWorks: {
-      title: "使い方",
-      steps: [
-        {
-          title: "画像を追加",
-          desc: "ドラッグ＆ドロップ、貼り付け、またはクリックでアップロード",
-        },
-        { title: "設定を調整", desc: "フォーマット、品質、最大幅を選択" },
-        { title: "ダウンロード", desc: "個別または一括ダウンロード" },
-      ],
-    },
-    faq: {
-      title: "よくある質問",
-      items: [
-        {
-          q: "画像はサーバーにアップロードされますか？",
-          a: "いいえ。すべての圧縮処理は完全にブラウザ内で行われます。画像がデバイスから外部に出ることはありません。インターネット接続を切断しても引き続き使用できます。",
-        },
-        {
-          q: "どのフォーマットに対応していますか？",
-          a: "iPhone の HEIC/HEIF とブラウザがデコードできる静止画像形式に対応。出力は WebP、PNG、JPEG から選択できます。アニメーション画像は静止画として処理されます。",
-        },
-        {
-          q: "AVIF 出力がまだ利用できないのはなぜですか？",
-          a: "ブラウザが AVIF を表示できても、安定してエンコードできるとは限りません。ダウンロード形式の正確性を保証できるよう、検証後に提供します。",
-        },
-        {
-          q: "PNG は透明背景を保持しますか？",
-          a: "はい。PNG はアルファ透明チャンネルを完全に保持します。JPEG は透明非対応で、WebP は透明対応です。",
-        },
-        {
-          q: "圧縮で画質は劣化しますか？",
-          a: "品質スライダーで WebP/JPEG の画質とサイズを調整できます。PNG 出力では品質スライダーを使用せず、通常はサイズが大きくなります。",
         },
       ],
     },

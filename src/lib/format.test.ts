@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { compressionRatio, formatDelta, formatSize } from "./format.ts";
+import { compressionRatio, formatDelta, formatSize, formatTargetSize } from "./format.ts";
 
 test("formats sizes with binary units", () => {
   assert.equal(formatSize(512), "512 B");
@@ -27,4 +27,11 @@ test("marks a file that grew with a plus sign", () => {
 
 test("returns null instead of a ratio while there is no result yet", () => {
   assert.equal(compressionRatio(1000, null), null);
+});
+
+test("expresses a target size in KB so it matches the target field", () => {
+  // 同一个值不能一处写 1.0 MB、一处写 1024 KB
+  assert.equal(formatTargetSize(1024 * 1024), "1024 KB");
+  assert.equal(formatTargetSize(500 * 1024), "500 KB");
+  assert.equal(formatTargetSize(800 * 1024), "800 KB");
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { BASE_PATH } from "@/lib/base-path";
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
@@ -11,7 +12,8 @@ export function ServiceWorkerRegistration() {
       return;
     }
 
-    void navigator.serviceWorker.register("/sw.js", {
+    // sw.js 是 public/ 下的静态文件，Next 不会给它补 basePath。
+    void navigator.serviceWorker.register(`${BASE_PATH}/sw.js`, {
       updateViaCache: "none",
     });
   }, []);

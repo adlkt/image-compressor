@@ -20,3 +20,13 @@ export function formatDelta(ratio: number) {
   const sign = precise > 0 ? "-" : precise < 0 ? "+" : "";
   return `${sign}${Math.abs(precise)}%`;
 }
+
+/**
+ * 目标体积一律用 KB 表达。
+ *
+ * 目标大小的输入范围就是 20–10240 KB；预设规格格若走 formatSize，
+ * 同一个值会在同一屏上写成 "1.0 MB"，与输入框的 "1024 KB" 对不上。
+ */
+export function formatTargetSize(bytes: number) {
+  return `${Math.round(bytes / 1024)} KB`;
+}

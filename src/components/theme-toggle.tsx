@@ -16,9 +16,10 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return (
-      <div className="size-8 rounded-md border border-border bg-card" />
-    );
+    // Same box as the real control (icon size = size-11), but invisible:
+    // the ghost button has no fill or border at rest, so a bordered
+    // placeholder would flash a box the user never sees again.
+    return <div className="size-11" aria-hidden />;
   }
 
   const cycle = () => {
@@ -36,10 +37,11 @@ export function ThemeToggle() {
       <Monitor className="w-4 h-4" />
     );
 
-  const label =
-    theme === "light"
+  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+  const nextLabel =
+    nextTheme === "light"
       ? t.theme.light
-      : theme === "dark"
+      : nextTheme === "dark"
         ? t.theme.dark
         : t.theme.auto;
 
@@ -48,8 +50,8 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={cycle}
-      title={label}
-      aria-label={label}
+      title={`${t.theme.switchTo} ${nextLabel}`}
+      aria-label={`${t.theme.switchTo} ${nextLabel}`}
     >
       {icon}
     </Button>

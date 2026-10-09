@@ -20,7 +20,7 @@ export const DELIVERY_RECIPES: Record<PresetId, {
 
 /**
  * 参数与某一档完全一致时返回那一档。
- * 没有它，刷新后档位灯会全灭，而参数其实还是那一档的。
+ * 没有它，刷新后当前预设会认不出来，而参数其实还是那一档的。
  */
 export function matchRecipe(
   format: Format,
@@ -90,8 +90,7 @@ type State = {
 const DEFAULTS_KEY = "image-compressor:defaults";
 
 /**
- * 首屏默认档位落在「Web 优化」上。
- * 一打开就是一台已经调好的机器：尺子上有目标线可看，拖进来的图直接按这一档压。
+ * 默认参数落在「Web 优化」上：拖进来的图直接按这一档压。
  */
 const WEB_PRESET = DELIVERY_RECIPES.web;
 
