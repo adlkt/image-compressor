@@ -16,10 +16,18 @@
 *.tsbuildinfo
 next-env.d.ts
 
+# local caches and tooling
 .turbo/
-.next
+.impeccable/
+.wrangler/
+.scratch/
 
-.turbo
+# local deployment and agent documentation
+docs/
+wrangler.jsonc
+worker/
 
-.impeccable
-.wrangler
+CONTEXT.md
+DESIGN.md
+AGENTS.md
+PRODUCT.md
