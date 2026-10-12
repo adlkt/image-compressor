@@ -24,10 +24,19 @@
 
 生产域名：https://image-compressor.ichinosehonami.com
 
-部署到 Cloudflare Pages 的 `image-compressor` 项目，使用静态导出：
+推送到 GitHub 的 `main` 分支后，GitHub Actions 自动安装依赖、执行 lint 和测试、构建静态页面，并部署到现有 Cloudflare Pages 的 `image-compressor` 项目。也可以在 Actions 页面手动运行 `Deploy to Cloudflare Pages`。
+
+仓库的 Settings → Secrets and variables → Actions 需要配置：
+
+- `CLOUDFLARE_ACCOUNT_ID`：Pages 项目所属的 Cloudflare 账号 ID。
+- `CLOUDFLARE_API_TOKEN`：限定到该账号、具有 `Account → Cloudflare Pages → Edit` 权限的 API Token。
+
+依赖通过已提交的 `package-lock.json` 和 `npm ci` 安装；任一检查失败都不会部署。自动部署配置位于 `.github/workflows/deploy.yml`。
+
+本地手动部署仍可使用：
 
 ```sh
-pnpm build
+npm run build
 CLOUDFLARE_ACCOUNT_ID=b8d9fe70db0dbe5ad73caa80c514c854 wrangler pages deploy out --project-name=image-compressor --branch=main
 ```
 
