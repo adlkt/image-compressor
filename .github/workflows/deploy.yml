@@ -42,6 +42,7 @@ jobs:
       - name: Deploy
         uses: cloudflare/wrangler-action@v4
         with:
+          wranglerVersion: '4.147.0'
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy out --project-name=image-compressor --branch=main
