@@ -268,7 +268,7 @@ export function SummaryBar() {
             variant={multiple ? "outline" : "default"}
             size="lg"
             onClick={downloadAll}
-            disabled={!allDone || compressing}
+            disabled={completed.length === 0 || !allDone || compressing}
             className={multiple ? "order-3 col-span-2 w-full sm:order-none sm:w-auto" : "w-full sm:w-auto"}
           >
             {compressing ? (
@@ -283,7 +283,7 @@ export function SummaryBar() {
               type="button"
               size="lg"
               onClick={() => void downloadZip()}
-              disabled={!allDone || compressing || exporting}
+              disabled={completed.length === 0 || !allDone || compressing || exporting}
               className="order-2 w-full sm:order-none sm:w-auto"
             >
               {exporting ? (

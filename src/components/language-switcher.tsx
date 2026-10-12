@@ -39,7 +39,7 @@ export function LanguageSwitcher() {
                 disabled={isPending}
                 onClick={() => setLang(opt.value)}
                 aria-current={lang === opt.value ? "true" : undefined}
-                className={`flex cursor-default items-center justify-between px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-foreground data-[disabled]:opacity-60 ${lang === opt.value ? "text-foreground" : "text-muted-foreground"}`}
+                className={`flex min-h-11 cursor-default items-center justify-between px-3 py-2 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-foreground data-[disabled]:opacity-60 ${lang === opt.value ? "text-foreground" : "text-muted-foreground"}`}
               >
                 <span>{opt.label}</span>
                 {lang === opt.value && (

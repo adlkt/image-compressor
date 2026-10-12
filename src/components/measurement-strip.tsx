@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { BASE_PATH } from "@/lib/base-path";
 import { compressionRatio, formatDelta, formatSize } from "@/lib/format";
@@ -67,11 +66,8 @@ export function MeasurementStrip() {
           </div>
         </div>
 
-        <details className="group mx-auto mt-5 max-w-3xl border-t border-black/10 dark:border-white/15">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/30">
-            {t.measure.params}
-            <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
-          </summary>
+        <details className="group mx-auto mt-5 max-w-3xl">
+          <summary className="params-space">{t.measure.params}</summary>
         <dl className="grid gap-x-10 gap-y-6 border-t border-black/10 py-6 dark:border-white/15 sm:grid-cols-2 lg:grid-cols-3">
           <Condition
             label={t.measure.params}

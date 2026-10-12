@@ -217,6 +217,11 @@
 }
 
 @layer components {
+  .params-space {
+    visibility: hidden;
+    min-height: 48px;
+  }
+
   /*
     画布底：Showcase Gray。照片落在这一层上，画布读作画布，不读作内容。
     曾经把棋盘格铺满这一层，结果屏幕上最大的一块面变成了纹理，
@@ -245,10 +250,16 @@
   /* 质量滑块的轨道与手柄 */
   .fader {
     width: 100%;
-    height: 24px;
+    height: 44px;
     cursor: pointer;
     appearance: none;
     background: transparent;
+  }
+
+  .fader:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
   .fader::-webkit-slider-runnable-track {
