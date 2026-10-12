@@ -59,7 +59,7 @@ export function FileQueue() {
 
   return (
     <section
-      className="order-1 flex max-h-64 min-h-0 flex-col border-b border-border bg-card xl:max-h-none xl:border-b-0 xl:border-r"
+      className="order-1 flex max-h-36 min-h-0 sm:max-h-64 flex-col border-b border-border bg-card xl:max-h-none xl:border-b-0 xl:border-r"
       aria-label={t.controls.files}
     >
       <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
@@ -143,7 +143,7 @@ export function FileQueue() {
                     <span className="mt-2 block truncate text-xs text-destructive">
                       {t.controls.retry}
                     </span>
-                  ) : (
+                  ) : files.length > 1 ? (
                     <span className="mt-2 flex items-center gap-3">
                       <SizeBar
                         original={file.file.size}
@@ -160,7 +160,7 @@ export function FileQueue() {
                           </span>
                         )}
                     </span>
-                  )}
+                  ) : null}
                 </span>
               </button>
 

@@ -132,7 +132,7 @@ export const translations: Record<Lang, Translations> = {
       claim: "图片不上传，压缩在你的浏览器里跑完。",
       samples: "选择一张示例图",
       sampleLabels: ["云层航拍照片", "沙漠航拍照片"],
-      samplesNote: "示例图由本工具压缩生成。",
+      samplesNote: "PNG 演示图由展示照片转换，可直接试压缩。",
       sampleError: "示例图加载失败，请选择你自己的图片。",
     },
     measure: {
@@ -333,7 +333,7 @@ export const translations: Record<Lang, Translations> = {
       claim: "Images are never uploaded. Compression runs in your browser.",
       samples: "Choose a sample image",
       sampleLabels: ["Aerial cloud photo", "Aerial desert photo"],
-      samplesNote: "These examples were compressed by this tool.",
+      samplesNote: "PNG demos are converted from the displayed photos.",
       sampleError: "The example could not be loaded. Choose one of your own images instead.",
     },
     measure: {

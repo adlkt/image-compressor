@@ -9,8 +9,7 @@ import { PresetSelector } from "./preset-selector";
 /**
  * 控制栏。
  *
- * 顺序就是使用顺序：先挑预设（粗调），再看这一张的结果（数值），
- * 然后给目标大小，最后才逐项细调。细调默认折叠——预设已经覆盖了
+ * 先设目标大小，再用预设作为快捷入口，最后逐项细调。细调默认折叠——预设已经覆盖了
  * 常见用途，把 格式 / 质量 / 最大宽度 一直摊在上面会把「目标大小」
  * 挤出第一屏，而按目标体积反解参数正是本产品的差异点。
  */
@@ -41,9 +40,7 @@ export function SettingsBar() {
     >
       <div className="flex flex-col gap-6 p-4 xl:p-5">
         {/* 目标大小是产品差异点：所有屏宽都先给目标，再给作为快捷入口的预设。 */}
-        <PresetSelector orientation="column" className="order-2" />
-
-        <div className="order-1">
+        <div>
           <TargetSizeInput
             key={`${selectedFile.id}-${selectedFile.targetBytes}-${selectedFile.format}`}
             id={selectedFile.id}
@@ -56,8 +53,10 @@ export function SettingsBar() {
           />
         </div>
 
+        <PresetSelector orientation="column" />
+
         {/* 细调：低频项收进来，需要时才展开 */}
-        <details className="group order-3 border-t border-border pt-4">
+        <details className="group border-t border-border pt-4">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-sm leading-[1.4] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
             {t.controls.fineTune}
             <ChevronDown

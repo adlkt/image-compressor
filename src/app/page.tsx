@@ -48,13 +48,13 @@ export default function Home() {
   return (
     <div
       className={`flex flex-col text-foreground ${
-        hasFiles ? "min-h-dvh lg:h-dvh lg:overflow-hidden" : "min-h-dvh"
+        hasFiles ? "min-h-dvh xl:h-dvh xl:overflow-hidden" : "min-h-dvh"
       }`}
     >
       <Navbar contained={!hasFiles} />
 
       {hasFiles ? (
-        <main className="flex min-h-0 flex-1 flex-col pb-32 sm:pb-0">
+        <main className={`flex min-h-0 flex-1 flex-col sm:pb-0 ${files.length > 1 ? "pb-48" : "pb-24"}`}>
           <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[19rem_minmax(0,1fr)_24rem]">
             <FileQueue />
             <PreviewPanel />

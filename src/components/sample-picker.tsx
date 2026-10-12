@@ -7,21 +7,23 @@ import { BASE_PATH } from "@/lib/base-path";
 /**
  * 示例图。
  *
- * 每一张都是本工具自己的压缩输出，点一下 fetch 回一个 File 直接送进流程：
+ * PNG 演示输入由现有展示照片转换，点一下 fetch 回一个 File 直接送进流程：
  * 还在犹豫的人不必先去找一张图，就能看到完整的一次压缩。
  *
  * 走 raw fetch，Next 不会自动补 basePath，得自己加。
  */
 const SAMPLES = [
   {
-    src: `${BASE_PATH}/samples/photo-clouds.webp`,
-    name: "example-clouds.webp",
+    src: `${BASE_PATH}/samples/photo-clouds.png`,
+    thumbnail: `${BASE_PATH}/samples/photo-clouds.webp`,
+    name: "example-clouds.png",
     width: 1920,
     height: 1440,
   },
   {
-    src: `${BASE_PATH}/samples/photo-desert.webp`,
-    name: "example-desert.webp",
+    src: `${BASE_PATH}/samples/photo-desert.png`,
+    thumbnail: `${BASE_PATH}/samples/photo-desert.webp`,
+    name: "example-desert.png",
     width: 1920,
     height: 1078,
   },
@@ -62,7 +64,7 @@ export function SamplePicker({ onFiles }: { onFiles: (files: File[]) => void }) 
               className="block size-11 overflow-hidden rounded-full border-2 border-white outline-none transition-transform hover:scale-105 focus-visible:ring-4 focus-visible:ring-ring/20 disabled:opacity-60 dark:border-black"
             >
               <img
-                src={sample.src}
+                src={sample.thumbnail}
                 alt=""
                 width={sample.width}
                 height={sample.height}

@@ -67,7 +67,7 @@ export function PresetSelector({
       <div
         className={
           column
-            ? "flex flex-col gap-1"
+            ? "grid grid-cols-2 gap-1 xl:flex xl:flex-col"
             : "grid grid-cols-2 gap-1 sm:grid-cols-4"
         }
       >

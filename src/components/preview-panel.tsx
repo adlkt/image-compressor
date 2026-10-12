@@ -57,7 +57,7 @@ export function PreviewPanel() {
       <article
         className={`${mobileView === kind ? "flex" : "hidden"} min-h-0 flex-col lg:flex`}
       >
-        <header className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-border px-3">
+        <header className="hidden h-12 lg:flex shrink-0 items-center justify-between gap-3 border-b border-border px-3">
           <span className="flex items-baseline gap-2">
             <span className="text-sm leading-[1.4] font-semibold">
               {isOriginal ? t.controls.original : t.controls.compressed}
@@ -70,7 +70,7 @@ export function PreviewPanel() {
           </span>
         </header>
 
-        <div className="canvas-stage flex h-60 items-center justify-center p-4 lg:h-auto lg:min-h-0 lg:flex-1">
+        <div className="canvas-stage flex h-44 items-center justify-center p-3 sm:h-72 xl:h-auto xl:min-h-0 xl:flex-1">
           {url ? (
             <img
               src={url}
@@ -131,7 +131,7 @@ export function PreviewPanel() {
         )}
       </div>
 
-      <div className="flex h-12 shrink-0 items-center border-b border-border px-3 lg:hidden">
+      <div className="flex min-h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3 lg:hidden">
         <div className="flex gap-1 rounded-sm bg-secondary p-1">
           {(["original", "compressed"] as const).map((kind) => (
             <button
@@ -149,6 +149,9 @@ export function PreviewPanel() {
             </button>
           ))}
         </div>
+        <span data-numeric className="text-xs text-muted-foreground">
+          {mobileView === "original" ? selected.originalWidth : outputWidth} × {mobileView === "original" ? selected.originalHeight : outputHeight}
+        </span>
       </div>
 
       <div className="grid min-h-0 flex-1 lg:grid-cols-2 lg:divide-x lg:divide-border">

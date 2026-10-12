@@ -4,33 +4,33 @@ import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { BASE_PATH } from "@/lib/base-path";
-import { formatSize } from "@/lib/format";
+import { compressionRatio, formatDelta, formatSize } from "@/lib/format";
 
 /**
  * 首屏下方那条真实读数。
  *
  * 每一个数字都来自一次真实压缩：把 public/samples/photo-clouds.webp 的
- * 原始 2000×1500 PNG 交给产品自己的压缩流程走一遍，取 worker 回传的
+ * 1920×1440 PNG 演示输入（由展示用 WebP 转换） 交给产品自己的压缩流程走一遍，取 worker 回传的
  * blob 字节数与耗时。测量条件（参数、环境、日期）一并列出——
  * 不披露条件的数字只是装饰。
  *
  * 条件本身摊成规格格：参数与环境各自成格，不拼成一句话。
  */
 const MEASURED = {
-  sourceWidth: 2000,
-  sourceHeight: 1500,
-  sourceBytes: 3_649_429,
+  sourceWidth: 1920,
+  sourceHeight: 1440,
+  sourceBytes: 2_397_788,
   outputWidth: 1920,
   outputHeight: 1440,
-  outputBytes: 172_382,
+  outputBytes: 157_886,
   format: "WebP",
   quality: 80,
   maxWidth: 1920,
   targetBytes: 512_000,
-  elapsedMs: 237,
-  browser: "Chrome 154",
+  elapsedMs: 210,
+  browser: "Chrome 155",
   os: "macOS",
-  date: "2026-09-24",
+  date: "2026-10-12",
 };
 
 export function MeasurementStrip() {
@@ -63,7 +63,7 @@ export function MeasurementStrip() {
                 {formatSize(MEASURED.outputBytes)}
               </span>
             </p>
-            <span data-numeric className="text-readout mt-2 block font-semibold text-[#30d158] sm:mt-0">-95%</span>
+            <span data-numeric className="text-readout mt-2 block font-semibold text-[#30d158] sm:mt-0">{formatDelta(compressionRatio(MEASURED.sourceBytes, MEASURED.outputBytes)!)}</span>
           </div>
         </div>
 
@@ -86,6 +86,7 @@ export function MeasurementStrip() {
             </SpecGroup>
           </Condition>
 
+          <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-3">{t.hero.samplesNote}</p>
           <Condition
             label={t.measure.original}
             value={`${MEASURED.sourceWidth} × ${MEASURED.sourceHeight} PNG`}

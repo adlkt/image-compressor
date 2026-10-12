@@ -191,9 +191,9 @@ export function SummaryBar() {
         </details>
       )}
 
-      <div className="flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className={`flex gap-3 px-3 py-3 sm:items-center sm:justify-between ${multiple ? "flex-col sm:flex-row" : "items-center justify-between"}`}>
         {/* 批量数字 */}
-        <div className="hidden flex-wrap items-baseline gap-x-4 gap-y-1 sm:flex">
+        <div className={multiple ? "hidden flex-wrap items-baseline gap-x-4 gap-y-1 sm:flex" : "hidden"}>
           <Readout label={t.summary.totalOriginal} value={formatSize(totalOriginal)} />
           <Readout
             label={t.summary.totalCompressed}
@@ -227,7 +227,7 @@ export function SummaryBar() {
           )}
         </div>
 
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:hidden">
+        <div className={multiple ? "flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:hidden" : "hidden"}>
           <Readout
             label={t.summary.totalCompressed}
             value={allDone ? formatSize(totalCompressed) : "—"}
@@ -244,7 +244,12 @@ export function SummaryBar() {
           )}
         </div>
 
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 sm:flex">
+        {!multiple && statusLabel && (
+          <span role="status" aria-live="polite" className="shrink-0 text-xs text-muted-foreground">
+            {statusLabel}
+          </span>
+        )}
+        <div className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2 sm:flex ${multiple ? "" : "flex-1 sm:flex-none"}`}>
           <span className="border-r border-border pr-2 sm:mr-1">
             <Button
               type="button"
