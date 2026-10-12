@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://314925.xyz/image-compressor/sitemap.xml
+Sitemap: https://image-compressor.ichinosehonami.com/sitemap.xml

@@ -1,11 +1,7 @@
-/**
- * 站点挂在 314925.xyz/image-compressor 下，所有路径都带这层前缀。
- * 前缀从注册作用域反推（生产是 /image-compressor，本地 dev 是空串），
- * 这样本文件不需要参与构建、也不用重复维护那份常量。
- */
+// Derive asset paths from the registration scope. Pages uses the domain root.
 const BASE = new URL(self.registration.scope).pathname.replace(/\/$/, "");
 
-const CACHE_NAME = "image-compressor-shell-v2";
+const CACHE_NAME = "image-compressor-shell-v3";
 const APP_SHELL = [`${BASE}/`, `${BASE}/privacy`, `${BASE}/icon.svg`];
 
 self.addEventListener("install", (event) => {

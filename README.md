@@ -19,3 +19,16 @@
 - Zustand
 - Web Worker + Canvas 编码
 - `heic-to` + libheif WebAssembly 本地解码
+
+## 部署
+
+生产域名：https://image-compressor.ichinosehonami.com
+
+部署到 Cloudflare Pages 的 `image-compressor` 项目，使用静态导出：
+
+```sh
+pnpm build
+CLOUDFLARE_ACCOUNT_ID=b8d9fe70db0dbe5ad73caa80c514c854 wrangler pages deploy out --project-name=image-compressor --branch=main
+```
+
+产物目录为 `out/`，站点在域名根目录提供服务。执行部署前确认 Wrangler 登录的是域名所属账号。

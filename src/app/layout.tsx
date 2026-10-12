@@ -5,14 +5,7 @@ import { ServiceWorkerRegistration } from "@/components/service-worker-registrat
 import { I18nProvider } from "@/i18n";
 import { BASE_PATH } from "@/lib/base-path";
 
-/**
- * 站点挂在 apex 下的路径上（314925.xyz/image-compressor）。
- *
- * 坑：Next **不会**给 metadata 里的资源自动补 basePath —— 实测 og:image、icon、
- * alternates 都原样输出 /og-image.png、/icon.svg，落到线上就是 404。所以下面
- * 一律写含路径的绝对 URL，这样也不会被未来版本的自动补前缀逻辑二次拼接。
- */
-const SITE_ORIGIN = "https://314925.xyz";
+const SITE_ORIGIN = "https://image-compressor.ichinosehonami.com";
 const SITE_URL = `${SITE_ORIGIN}${BASE_PATH}`;
 
 export const metadata: Metadata = {
